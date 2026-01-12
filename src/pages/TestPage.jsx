@@ -1,0 +1,178 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+    Shield, Menu, X, Bell, Search,
+    BookOpen, Settings, CreditCard, Crown, LogOut,
+    Brain, Globe, PenTool, Clock, HelpCircle, Trophy, Newspaper, Play
+} from 'lucide-react';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const TestsPage = () => {
+    const navigate = useNavigate();
+
+    // --- ESTADOS ---
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
+
+    // --- DATOS MOCKUP PARA "PONTE A PRUEBA" ---
+    const practiceTests = [
+        {
+            id: 1,
+            title: "Examen 2022",
+            desc: "Examen Castila y león 2022",
+            level: "Fácil",
+            color: "from-blue-400 to-blue-600",
+            icon: <Globe className="h-8 w-8 text-white" />,
+            questions: 10,
+            time: "5 min"
+        },
+        {
+            id: 2,
+            title: "Lógica Policial",
+            desc: "Series numéricas y razonamiento abstracto. Entrena tu mente.",
+            level: "Medio",
+            color: "from-purple-500 to-indigo-600",
+            icon: <Brain className="h-8 w-8 text-white" />,
+            questions: 15,
+            time: "10 min"
+        },
+        {
+            id: 3,
+            title: "Ortografía y Gramática",
+            desc: "Detecta las faltas. Imprescindible para el examen oficial.",
+            level: "Difícil",
+            color: "from-pink-500 to-rose-600",
+            icon: <PenTool className="h-8 w-8 text-white" />,
+            questions: 25,
+            time: "15 min"
+        },
+        {
+            id: 4,
+            title: "Tipo test extenso",
+            desc: "Mezcla de temas con mcuhas preguntas. ¿Estás listo para el reto?",
+            level: "Experto",
+            color: "from-yellow-400 to-orange-500",
+            icon: <Trophy className="h-8 w-8 text-white" />,
+            questions: 150,
+            time: "30 min"
+        }
+    ];
+
+    // --- LOGOUT & AUTH ---
+    const handleLogout = () => {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_name');
+        navigate('/login');
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) { navigate('/login'); return; }
+
+        fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration }))
+            .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno' })));
+    }, [navigate]);
+
+    return (
+        <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
+            {/* NAVBAR */}
+            <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
+                <div className="container mx-auto flex justify-between items-center">
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <Shield className="h-8 w-8 text-yellow-500" />
+                        <div className="flex flex-col">
+                            <span className="text-lg font-bold tracking-wider uppercase leading-none">AULA VIRTUAL</span>
+                            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Tu Plaza Mi Meta</span>
+                        </div>
+                    </div>
+
+                    {/* MENU CENTRAL */}
+                    <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                        {/* BOTÓN TEMARIO (Inactivo, lleva a /descargas) */}
+                        <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <BookOpen className="h-4 w-4 mr-2"/> Temario
+                        </button>
+                        
+                        {/* BOTÓN PONTE A PRUEBA (Activo) */}
+                        <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">
+                            <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                        </button>
+
+                        <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                        </button>
+
+                        <div className="w-px h-6 bg-slate-700 mx-2"></div>
+                        <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
+                            <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
+                        </button>
+                    </div>
+
+                    {/* RIGHT SIDE (User) */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
+                        <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /></button>
+                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
+                            <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">{userData.name ? userData.name.charAt(0) : 'U'}</div>
+                            <span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span>
+                        </button>
+                    </div>
+                    <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
+                </div>
+            </nav>
+
+            {/* MODAL PERFIL */}
+            {isProfileOpen && (
+                <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
+                    <div className="absolute top-20 right-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6" onClick={e => e.stopPropagation()}>
+                        <div className="text-center mb-6">
+                            <div className="h-16 w-16 bg-slate-900 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">{userData.name?.charAt(0)}</div>
+                            <h3 className="font-bold">{userData.name}</h3>
+                            <p className="text-xs text-slate-500">{userData.email}</p>
+                        </div>
+                        <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2 rounded-lg font-bold text-sm hover:bg-red-100">Cerrar Sesión</button>
+                    </div>
+                </div>
+            )}
+
+            {/* CONTENIDO PRINCIPAL: TESTS */}
+            <div className="container mx-auto px-6 py-12">
+                <div className="animate-fade-in-up">
+                    <div className="mb-10 text-center">
+                        <h1 className="text-3xl font-bold text-slate-900">Zona de Entrenamiento 🧠</h1>
+                        <p className="text-slate-600 mt-2 max-w-2xl mx-auto">Selecciona un examen y ponte a prueba.</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                        {practiceTests.map((test) => (
+                            <article key={test.id} className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full">
+                                <div className={`bg-gradient-to-r ${test.color} p-6 flex justify-between items-start text-white`}>
+                                    <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">{test.icon}</div>
+                                    <span className="bg-black/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm">{test.level}</span>
+                                </div>
+                                <div className="p-6 flex flex-col flex-grow">
+                                    <h3 className="text-2xl font-bold text-slate-800 mb-2">{test.title}</h3>
+                                    <p className="text-slate-500 mb-6 flex-grow">{test.desc}</p>
+                                    <div className="flex items-center space-x-6 text-sm text-slate-400 mb-6 border-t border-slate-100 pt-4">
+                                        <div className="flex items-center"><HelpCircle className="h-4 w-4 mr-2 text-blue-400"/> {test.questions} preguntas</div>
+                                        <div className="flex items-center"><Clock className="h-4 w-4 mr-2 text-blue-400"/> {test.time} aprox</div>
+                                    </div>
+                                    <button 
+                                        onClick={() => alert(`Iniciando test de: ${test.title}\n(Aquí se abriría el modal de preguntas)`)}
+                                        className="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center group"
+                                    >
+                                        Empezar Test <Play className="h-4 w-4 ml-2 group-hover:translate-x-1 transition" />
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default TestsPage;

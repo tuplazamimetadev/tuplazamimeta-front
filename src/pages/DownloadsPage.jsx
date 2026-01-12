@@ -1,0 +1,148 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+    Shield, Menu, X, Bell, Search,
+    BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
+    Link as LinkIcon, File, Play, Download, Lock, LogOut,
+    Brain, Newspaper
+} from 'lucide-react';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const DownloadsPage = () => {
+    const navigate = useNavigate();
+
+    // --- ESTADOS ---
+    const [contents, setContents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
+
+    // --- LOGOUT & FETCH ---
+    const handleLogout = () => {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_name');
+        navigate('/login');
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) { navigate('/login'); return; }
+
+        fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration }))
+            .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno', role: 'Sin Plan' })));
+
+        fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => { setContents(data); setLoading(false); })
+            .catch(() => setLoading(false));
+    }, [navigate]);
+
+    const getIcon = (type) => {
+        switch (type) {
+            case 'PDF': return <FileText className="h-6 w-6" />;
+            case 'WORD': return <FileText className="h-6 w-6" />;
+            case 'VIDEO': return <Video className="h-6 w-6" />;
+            case 'TEST': return <CheckCircle className="h-6 w-6" />;
+            case 'LINK': return <LinkIcon className="h-6 w-6" />;
+            default: return <File className="h-6 w-6" />;
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
+            {/* NAVBAR */}
+            <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
+                <div className="container mx-auto flex justify-between items-center">
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <Shield className="h-8 w-8 text-yellow-500" />
+                        <div className="flex flex-col">
+                            <span className="text-lg font-bold tracking-wider uppercase leading-none">AULA VIRTUAL</span>
+                            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Tuplazamimeta</span>
+                        </div>
+                    </div>
+
+                    {/* Menú Central */}
+                    <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                        {/* BOTÓN TEMARIO (Activo) */}
+                        <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
+                            <BookOpen className="h-4 w-4 mr-2"/> Temario
+                        </button>
+
+                        {/* BOTÓN PONTE A PRUEBA (Inactivo, lleva a /tests) */}
+                        <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                        </button>
+
+                        <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                        </button>
+
+                        <div className="w-px h-6 bg-slate-700 mx-2"></div>
+                        <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
+                            <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
+                        </button>
+                    </div>
+
+                    {/* User Area */}
+                    <div className="hidden md:flex items-center space-x-4">
+                        <div className="relative hidden lg:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
+                        <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /><span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span></button>
+                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition"><div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">{userData.name ? userData.name.charAt(0) : 'U'}</div><span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span></button>
+                    </div>
+                    <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
+                </div>
+            </nav>
+
+            {/* MODAL PERFIL */}
+            {isProfileOpen && (
+                <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
+                    <div className="absolute top-20 right-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6" onClick={e => e.stopPropagation()}>
+                        <div className="text-center mb-6"><div className="h-16 w-16 bg-slate-900 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">{userData.name?.charAt(0)}</div><h3 className="font-bold">{userData.name}</h3><p className="text-xs text-slate-500">{userData.email}</p></div>
+                        <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2 rounded-lg font-bold text-sm hover:bg-red-100">Cerrar Sesión</button>
+                    </div>
+                </div>
+            )}
+
+            {/* CONTENIDO PRINCIPAL: TEMARIO */}
+            <div className="container mx-auto px-6 py-12">
+                <div className="mb-10 animate-fade-in-up">
+                    <h1 className="text-3xl font-bold text-slate-900">Material Didáctico</h1>
+                    <p className="text-slate-600 mt-2">Todo el contenido de tu curso, actualizado al minuto.</p>
+                </div>
+
+                {loading && <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto mb-4"></div><p className="text-slate-500">Cargando tu temario...</p></div>}
+                
+                {!loading && (
+                    <div className="space-y-10 max-w-6xl mx-auto">
+                        {contents.map((topic) => (
+                            <div key={topic.id} className="animate-fade-in-up">
+                                <div className="flex items-center mb-6 border-b border-slate-200 pb-2">
+                                    <div className="bg-slate-900 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold mr-4 text-lg shadow-md">{topic.id}</div>
+                                    <div><h2 className="text-xl md:text-2xl font-bold text-slate-800">{topic.title}</h2><p className="text-slate-500 text-sm hidden md:block">{topic.description}</p></div>
+                                    {topic.isPremium && <span className="ml-auto bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-sm"><Lock className="h-3 w-3 mr-1" /> PREMIUM</span>}
+                                </div>
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                                    {topic.materials && topic.materials.map((file) => (
+                                        <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
+                                            <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
+                                                <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${file.type === 'PDF' ? 'bg-red-50 text-red-600' : file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : file.type === 'TEST' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-600'}`}>{getIcon(file.type)}</div>
+                                                <div className="min-w-0"><h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3><div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1"><span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span></div></div>
+                                            </div>
+                                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">{file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}</a>
+                                        </div>
+                                    ))}
+                                    {(!topic.materials || topic.materials.length === 0) && <div className="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center text-slate-400 italic text-sm">No hay materiales disponibles.</div>}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default DownloadsPage;
