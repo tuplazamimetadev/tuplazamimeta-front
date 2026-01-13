@@ -192,45 +192,67 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* PRECIOS (RESUMEN) */}
+      {/* --- NUEVA SECCIÓN: OFERTA ACADÉMICA (BOTÓN CAMBIADO) --- */}
       <section className="bg-slate-900 py-24 text-white relative overflow-hidden">
+        {/* Fondo decorativo */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10 pointer-events-none">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-500 rounded-full blur-3xl"></div>
+        </div>
+
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Invierte en tu futuro</h2>
-            <p className="text-slate-300 text-lg">Precios transparentes. Sin permanencia.</p>
+            <div className="inline-block bg-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+              Academia Online
+            </div>
+            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Tu Preparación Integral</h2>
+            <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+              No dejes nada al azar. En nuestra academia online cubrimos todas las fases de la oposición con los mejores recursos digitales.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-center">
-            {/* Mensual */}
-            <div className="bg-slate-800 text-white rounded-3xl p-8 border border-slate-700 hover:border-slate-500 transition">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-widest mb-2">Mensual</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-bold">29€</span><span className="text-slate-400 ml-2">/mes</span></div>
-              <ul className="space-y-4 mb-8 text-slate-300">
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-3"/> Tests ilimitados</li>
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-3"/> Temario Básico</li>
-              </ul>
-              <button onClick={() => navigate('/registro')} className="w-full py-3 rounded-xl border border-slate-600 hover:bg-slate-700 font-bold transition">Elegir Mensual</button>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            
+            {/* Tarjeta 1: Teoría */}
+            <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-blue-500 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-600 transition-colors">
+                <BookOpen className="h-8 w-8 text-blue-400 group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Módulo de Conocimientos</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Acceso completo al temario digital, resúmenes estratégicos y esquemas. Clases en vídeo explicando los conceptos jurídicos más complejos de forma sencilla.
+              </p>
             </div>
-            {/* Trimestral */}
-            <div className="bg-gradient-to-b from-blue-600 to-blue-800 text-white rounded-3xl p-8 relative transform md:scale-110 shadow-2xl border border-blue-500">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-slate-900 text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wide">Opción más elegida</div>
-              <h3 className="text-lg font-bold text-blue-200 uppercase tracking-widest mb-2">Trimestral</h3>
-              <div className="flex items-baseline mb-2"><span className="text-5xl font-bold">75€</span><span className="text-blue-200 ml-2">/3 meses</span></div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-yellow-400 mr-3"/> <strong>Todo incluido</strong></li>
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-yellow-400 mr-3"/> Planificador inteligente</li>
-              </ul>
-              <button onClick={() => navigate('/registro')} className="w-full py-4 rounded-xl bg-yellow-500 text-slate-900 font-bold hover:bg-yellow-400 transition shadow-lg">Empezar Ahora</button>
+
+            {/* Tarjeta 2: Práctica */}
+            <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-yellow-500 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500 transition-colors">
+                <CheckCircle className="h-8 w-8 text-yellow-400 group-hover:text-slate-900" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Entrenamiento de Test</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Generador de exámenes ilimitado. Simulacros reales con control de tiempo y ranking de alumnos. Analizamos tus estadísticas para decirte dónde mejorar.
+              </p>
             </div>
-            {/* Anual */}
-            <div className="bg-slate-800 text-white rounded-3xl p-8 border border-slate-700 hover:border-slate-500 transition">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-widest mb-2">Anual</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-bold">250€</span><span className="text-slate-400 ml-2">/año</span></div>
-              <ul className="space-y-4 mb-8 text-slate-300">
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-3"/> Acceso VIP 1 año</li>
-                <li className="flex items-center"><CheckCircle className="h-5 w-5 text-green-400 mr-3"/> Entrevista Personal</li>
-              </ul>
-              <button onClick={() => navigate('/registro')} className="w-full py-3 rounded-xl border border-slate-600 hover:bg-slate-700 font-bold transition">Elegir Anual</button>
+
+            {/* Tarjeta 3: Psicos y Ortografía */}
+            <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-green-500 transition-colors duration-300 group">
+              <div className="w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-green-500 transition-colors">
+                <Shield className="h-8 w-8 text-green-400 group-hover:text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Ortografía y Psicotécnicos</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Preparación específica para las pruebas de corte. Cursos intensivos de ortografía y batería de psicotécnicos con explicaciones detalladas de resolución.
+              </p>
             </div>
+
+          </div>
+
+          <div className="mt-12 text-center">
+             {/* ⬇️ AQUÍ ESTÁ EL CAMBIO IMPORTANTE: navigate('/tarifas') ⬇️ */}
+             <button onClick={() => navigate('/tarifas')} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-900/50 transition transform hover:-translate-y-1">
+               Ver Planes y Precios
+             </button>
           </div>
         </div>
       </section>
