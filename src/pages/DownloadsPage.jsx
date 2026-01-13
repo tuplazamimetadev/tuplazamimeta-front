@@ -4,9 +4,11 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper
+    Brain, Newspaper, Calendar, User
 } from 'lucide-react';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const DownloadsPage = () => {
     const navigate = useNavigate();
 
@@ -16,7 +18,14 @@ const DownloadsPage = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
+    
+    // Estado inicial de usuario
+    const [userData, setUserData] = useState({ 
+        name: 'Cargando...', 
+        email: '', 
+        role: 'Estudiante', 
+        expiration: null 
+    });
 
     // --- LOGOUT & FETCH ---
     const handleLogout = () => {
@@ -29,11 +38,20 @@ const DownloadsPage = () => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
 
+        // 1. OBTENER DATOS DEL USUARIO
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
-            .then(data => setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration }))
+            .then(data => {
+                setUserData({ 
+                    name: data.name, 
+                    email: data.email, 
+                    role: data.role || 'Estudiante', 
+                    expiration: data.expiration // Asegúrate de que tu back envíe esto
+                });
+            })
             .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno', role: 'Sin Plan' })));
 
+        // 2. OBTENER CONTENIDOS
         fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : [])
             .then(data => { setContents(data); setLoading(false); })
@@ -51,6 +69,12 @@ const DownloadsPage = () => {
         }
     };
 
+    // Función auxiliar para formatear fechas
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Indefinido';
+        return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
             {/* NAVBAR */}
@@ -66,20 +90,15 @@ const DownloadsPage = () => {
 
                     {/* Menú Central */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        {/* BOTÓN TEMARIO (Activo) */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <BookOpen className="h-4 w-4 mr-2"/> Temario
                         </button>
-
-                        {/* BOTÓN PONTE A PRUEBA (Inactivo, lleva a /tests) */}
                         <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
                         </button>
-
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
                         </button>
-
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
                             <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
@@ -90,18 +109,88 @@ const DownloadsPage = () => {
                     <div className="hidden md:flex items-center space-x-4">
                         <div className="relative hidden lg:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
                         <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /><span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span></button>
-                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition"><div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">{userData.name ? userData.name.charAt(0) : 'U'}</div><span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span></button>
+                        
+                        {/* Botón Avatar */}
+                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
+                            <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">
+                                {userData.name ? userData.name.charAt(0) : 'U'}
+                            </div>
+                            <span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span>
+                        </button>
                     </div>
                     <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
                 </div>
             </nav>
 
-            {/* MODAL PERFIL */}
+            {/* --- MODAL PERFIL AVANZADO --- */}
             {isProfileOpen && (
                 <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
-                    <div className="absolute top-20 right-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6" onClick={e => e.stopPropagation()}>
-                        <div className="text-center mb-6"><div className="h-16 w-16 bg-slate-900 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">{userData.name?.charAt(0)}</div><h3 className="font-bold">{userData.name}</h3><p className="text-xs text-slate-500">{userData.email}</p></div>
-                        <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2 rounded-lg font-bold text-sm hover:bg-red-100">Cerrar Sesión</button>
+                    <div className="absolute top-20 right-4 w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all" onClick={e => e.stopPropagation()}>
+                        
+                        {/* Cabecera del Perfil */}
+                        <div className="bg-slate-900 p-6 text-center relative">
+                            <div className="h-20 w-20 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold shadow-lg border-4 border-slate-800 mb-3">
+                                {userData.name?.charAt(0)}
+                            </div>
+                            <h3 className="font-bold text-white text-xl">{userData.name}</h3>
+                            <p className="text-slate-400 text-sm mb-3">{userData.email}</p>
+                            
+                            {/* Badge del Rol */}
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 uppercase tracking-wide">
+                                <Crown className="w-3 h-3 mr-1" /> {userData.role}
+                            </span>
+                        </div>
+
+                        {/* Detalles y Configuración */}
+                        <div className="p-6 space-y-6">
+                            
+                            {/* Sección Suscripción */}
+                            <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Tu Suscripción</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-600">Estado:</span>
+                                        <span className="font-bold text-green-600 flex items-center"><CheckCircle className="w-3 h-3 mr-1"/> Activa</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-600">Válida hasta:</span>
+                                        <span className="font-bold text-slate-800 flex items-center">
+                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> 
+                                            {formatDate(userData.expiration)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Sección Configuración */}
+                            <div>
+                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Configuración</h4>
+                                <ul className="space-y-1">
+                                    <li>
+                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
+                                            <User className="w-4 h-4 mr-3" /> Editar Perfil
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
+                                            <CreditCard className="w-4 h-4 mr-3" /> Métodos de Pago
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
+                                            <Settings className="w-4 h-4 mr-3" /> Preferencias
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        {/* Footer Logout */}
+                        <div className="bg-slate-50 p-4 border-t border-slate-100">
+                            <button onClick={handleLogout} className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 py-2 rounded-lg font-bold text-sm transition">
+                                <LogOut className="w-4 h-4 mr-2" /> Cerrar Sesión
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
