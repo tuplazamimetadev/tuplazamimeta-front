@@ -36,19 +36,29 @@ const DownloadsPage = () => {
         navigate('/login');
     };
 
-    // --- FUNCIÓN PARA CARGAR CONTENIDOS ---
+    // --- FUNCIÓN PARA CARGAR CONTENIDOS (CON FILTRO) ---
     const fetchContents = () => {
         const token = localStorage.getItem('jwt_token');
         if (!token) return;
 
         fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : [])
-            .then(data => { setContents(data); setLoading(false); })
+            .then(data => { 
+                // --- FILTRO IMPORTANTE ---
+                // Ocultamos el tema especial de Tests para que no salga aquí
+                const filteredData = data.filter(topic => 
+                    !topic.title.toUpperCase().includes("TESTS GENERALES") && 
+                    !topic.title.toUpperCase().includes("SIMULACROS")
+                );
+                
+                setContents(filteredData); 
+                setLoading(false); 
+            })
             .catch(() => setLoading(false));
     };
 
-    // --- FUNCIÓN PARA BORRAR MATERIAL (CORREGIDA CON LOGS) ---
-const handleDeleteMaterial = async (e, materialId) => {
+    // --- FUNCIÓN PARA BORRAR MATERIAL ---
+    const handleDeleteMaterial = async (e, materialId) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -68,10 +78,9 @@ const handleDeleteMaterial = async (e, materialId) => {
             if (res.ok) {
                 console.log("✅ BORRADO EXITOSO (204). ACTUALIZANDO UI...");
 
-                // --- TRUCO: BORRAMOS DEL ESTADO LOCAL INMEDIATAMENTE ---
+                // Optimistic UI Update: Borramos visualmente antes de recargar
                 setContents(prevContents => {
                     return prevContents.map(topic => {
-                        // Si el tema tiene materiales, filtramos el que hemos borrado
                         if (topic.materials) {
                             return {
                                 ...topic,
@@ -82,8 +91,7 @@ const handleDeleteMaterial = async (e, materialId) => {
                     });
                 });
 
-                // Y luego, por si acaso, pedimos la lista al servidor en segundo plano
-                // (Si llega tarde no importa, porque ya lo hemos quitado visualmente)
+                // Sincronización en segundo plano
                 fetchContents(); 
 
             } else {
@@ -119,14 +127,12 @@ const handleDeleteMaterial = async (e, materialId) => {
 
     // --- HELPERS VISUALES ---
     const getIcon = (type) => {
-        // Normalizamos a mayúsculas por si acaso
         const safeType = type ? type.toUpperCase() : 'PDF';
-        
         switch (safeType) {
             case 'PDF': return <FileText className="h-6 w-6" />;
-            case 'WORD': return <FileText className="h-6 w-6" />; // Soporte Legacy
+            case 'WORD': return <FileText className="h-6 w-6" />;
             case 'VIDEO': return <Video className="h-6 w-6" />;
-            case 'TEST': return <CheckCircle className="h-6 w-6" />; // Icono TEST
+            case 'TEST': return <CheckCircle className="h-6 w-6" />;
             case 'LINK': return <LinkIcon className="h-6 w-6" />;
             default: return <File className="h-6 w-6" />;
         }
@@ -137,7 +143,6 @@ const handleDeleteMaterial = async (e, materialId) => {
         return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    // Determinar si puede editar (ADMIN o PROFESOR)
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
     return (
@@ -243,7 +248,7 @@ const handleDeleteMaterial = async (e, materialId) => {
 
                 <UploadManager 
                     userRole={userData.role} 
-                    topics={contents} 
+                    topics={contents} // Solo se enviarán los temas filtrados
                     onUploadSuccess={fetchContents} 
                 />
 
@@ -262,7 +267,6 @@ const handleDeleteMaterial = async (e, materialId) => {
                                     {topic.materials && topic.materials.map((file) => (
                                         <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
                                             <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                                {/* ICONO COLOREADO SEGÚN TIPO */}
                                                 <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
                                                     file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
                                                     file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
@@ -280,7 +284,6 @@ const handleDeleteMaterial = async (e, materialId) => {
                                                 </div>
                                             </div>
 
-                                            {/* ACCIONES (Botón Bajar + Botón Borrar) */}
                                             <div className="flex items-center space-x-2">
                                                 <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
                                                     {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
