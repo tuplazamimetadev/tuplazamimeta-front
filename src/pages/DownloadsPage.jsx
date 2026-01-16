@@ -47,46 +47,46 @@ const DownloadsPage = () => {
             .catch(() => setLoading(false));
     };
 
-    // --- FUNCIÓN PARA BORRAR MATERIAL (CORREGIDA) ---
-const handleDeleteMaterial = async (e, materialId) => {
-        // 1. Evitar recarga
+    // --- FUNCIÓN PARA BORRAR MATERIAL (CORREGIDA CON LOGS) ---
+    const handleDeleteMaterial = async (e, materialId) => {
+        // 1. IMPORTANTE: Evitamos que el navegador recargue la página
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("🔴 CLICK DETECTADO. ID:", materialId);
+        console.log("🔴 INTENTO DE BORRADO - ID:", materialId);
 
-        if (!window.confirm("¿Seguro?")) {
-            console.log("🔴 CANCELADO POR USUARIO");
+        if (!window.confirm("¿Estás seguro de que quieres eliminar este material? Esta acción no se puede deshacer.")) {
+            console.log("🔴 BORRADO CANCELADO POR EL USUARIO");
             return;
         }
         
         const token = localStorage.getItem('jwt_token');
-        console.log("🔴 TOKEN RECUPERADO:", token ? "SÍ" : "NO");
-
+        
         try {
-            console.log(`🔴 LANZANDO FETCH DELETE A: ${API_URL}/api/materials/${materialId}`);
+            console.log(`🔴 ENVIANDO DELETE A: ${API_URL}/api/materials/${materialId}`);
             
             const res = await fetch(`${API_URL}/api/materials/${materialId}`, {
-                method: 'DELETE', // <--- AQUÍ ESTÁ LA CLAVE
+                method: 'DELETE', // <--- Método explícito
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
             
-            console.log("🔴 RESPUESTA DEL SERVIDOR (STATUS):", res.status);
+            console.log("🔴 RESPUESTA DEL SERVIDOR:", res.status);
 
             if (res.ok) {
-                console.log("🔴 ÉXITO. RECARGANDO...");
+                console.log("✅ BORRADO EXITOSO. RECARGANDO LISTA...");
+                // Recargamos la lista para ver que desaparece
                 fetchContents();
             } else {
-                const text = await res.text();
-                console.error("🔴 ERROR DEL SERVIDOR:", text);
-                alert("Fallo al borrar: " + res.status);
+                const errorText = await res.text();
+                console.error("❌ ERROR DEL SERVIDOR:", errorText);
+                alert(`Error al eliminar (Status: ${res.status}). Revisa la consola.`);
             }
         } catch (error) {
-            console.error("🔴 ERROR DE RED:", error);
-            alert("Error de conexión");
+            console.error("❌ ERROR DE RED:", error);
+            alert("Error de conexión con el servidor.");
         }
     };
 
@@ -119,7 +119,7 @@ const handleDeleteMaterial = async (e, materialId) => {
         
         switch (safeType) {
             case 'PDF': return <FileText className="h-6 w-6" />;
-            case 'WORD': return <FileText className="h-6 w-6" />; // Soporte para archivos antiguos
+            case 'WORD': return <FileText className="h-6 w-6" />; // Soporte Legacy
             case 'VIDEO': return <Video className="h-6 w-6" />;
             case 'TEST': return <CheckCircle className="h-6 w-6" />; // Icono TEST
             case 'LINK': return <LinkIcon className="h-6 w-6" />;
@@ -257,12 +257,12 @@ const handleDeleteMaterial = async (e, materialId) => {
                                     {topic.materials && topic.materials.map((file) => (
                                         <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
                                             <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                                {/* LOGICA DE COLORES DE ICONOS */}
+                                                {/* ICONO COLOREADO SEGÚN TIPO */}
                                                 <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
                                                     file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
                                                     file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
                                                     file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
-                                                    file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : // LEGACY: Azul para words antiguos
+                                                    file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : 
                                                     'bg-gray-100 text-gray-600'
                                                 }`}>
                                                     {getIcon(file.type)}
@@ -275,12 +275,13 @@ const handleDeleteMaterial = async (e, materialId) => {
                                                 </div>
                                             </div>
 
+                                            {/* ACCIONES (Botón Bajar + Botón Borrar) */}
                                             <div className="flex items-center space-x-2">
                                                 <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
                                                     {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
                                                 </a>
                                                 
-                                                {/* BOTÓN DE BORRAR (CORREGIDO) */}
+                                                {/* BOTÓN DE BORRAR */}
                                                 {canEdit && (
                                                     <button 
                                                         type="button" 
