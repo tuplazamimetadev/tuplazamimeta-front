@@ -7,6 +7,9 @@ import {
     Brain, Newspaper, Calendar, User
 } from 'lucide-react';
 
+// Asegúrate de que la ruta sea correcta según donde creaste el archivo
+import UploadManager from '../components/UploadManager';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const DownloadsPage = () => {
@@ -27,18 +30,31 @@ const DownloadsPage = () => {
         expiration: null 
     });
 
-    // --- LOGOUT & FETCH ---
+    // --- LOGOUT ---
     const handleLogout = () => {
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('user_name');
         navigate('/login');
     };
 
+    // --- FUNCIÓN PARA CARGAR CONTENIDOS ---
+    // La definimos fuera del useEffect para poder llamarla desde el UploadManager
+    const fetchContents = () => {
+        const token = localStorage.getItem('jwt_token');
+        if (!token) return;
+
+        fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => { setContents(data); setLoading(false); })
+            .catch(() => setLoading(false));
+    };
+
+    // --- EFECTO INICIAL ---
     useEffect(() => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
 
-        // 1. OBTENER DATOS DEL USUARIO
+        // 1. Obtener Datos del Usuario
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
@@ -46,18 +62,16 @@ const DownloadsPage = () => {
                     name: data.name, 
                     email: data.email, 
                     role: data.role || 'Estudiante', 
-                    expiration: data.expiration // Asegúrate de que tu back envíe esto
+                    expiration: data.expiration
                 });
             })
             .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno', role: 'Sin Plan' })));
 
-        // 2. OBTENER CONTENIDOS
-        fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.ok ? res.json() : [])
-            .then(data => { setContents(data); setLoading(false); })
-            .catch(() => setLoading(false));
+        // 2. Cargar Contenidos Iniciales
+        fetchContents();
     }, [navigate]);
 
+    // --- HELPERS ---
     const getIcon = (type) => {
         switch (type) {
             case 'PDF': return <FileText className="h-6 w-6" />;
@@ -69,7 +83,6 @@ const DownloadsPage = () => {
         }
     };
 
-    // Función auxiliar para formatear fechas
     const formatDate = (dateString) => {
         if (!dateString) return 'Indefinido';
         return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -201,6 +214,13 @@ const DownloadsPage = () => {
                     <h1 className="text-3xl font-bold text-slate-900">Material Didáctico</h1>
                     <p className="text-slate-600 mt-2">Todo el contenido de tu curso, actualizado al minuto.</p>
                 </div>
+
+                {/* --- COMPONENTE DE SUBIDA (Solo visible si es Admin/Profesor) --- */}
+                <UploadManager 
+                    userRole={userData.role} 
+                    topics={contents} 
+                    onUploadSuccess={fetchContents} 
+                />
 
                 {loading && <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto mb-4"></div><p className="text-slate-500">Cargando tu temario...</p></div>}
                 
