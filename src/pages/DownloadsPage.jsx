@@ -4,10 +4,9 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User
+    Brain, Newspaper, Calendar, User, Trash2 // <--- AÑADIDO TRASH2
 } from 'lucide-react';
 
-// Asegúrate de que la ruta sea correcta según donde creaste el archivo
 import UploadManager from '../components/UploadManager';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -38,7 +37,6 @@ const DownloadsPage = () => {
     };
 
     // --- FUNCIÓN PARA CARGAR CONTENIDOS ---
-    // La definimos fuera del useEffect para poder llamarla desde el UploadManager
     const fetchContents = () => {
         const token = localStorage.getItem('jwt_token');
         if (!token) return;
@@ -47,6 +45,29 @@ const DownloadsPage = () => {
             .then(res => res.ok ? res.json() : [])
             .then(data => { setContents(data); setLoading(false); })
             .catch(() => setLoading(false));
+    };
+
+    // --- FUNCIÓN PARA BORRAR MATERIAL (NUEVA) ---
+    const handleDeleteMaterial = async (materialId) => {
+        if (!window.confirm("¿Estás seguro de que quieres eliminar este material? Esta acción no se puede deshacer.")) return;
+        
+        const token = localStorage.getItem('jwt_token');
+        try {
+            const res = await fetch(`${API_URL}/api/materials/${materialId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (res.ok) {
+                // Recargamos la lista para ver que desaparece
+                fetchContents();
+            } else {
+                alert("Error al eliminar el material");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Error de conexión");
+        }
     };
 
     // --- EFECTO INICIAL ---
@@ -75,7 +96,7 @@ const DownloadsPage = () => {
     const getIcon = (type) => {
         switch (type) {
             case 'PDF': return <FileText className="h-6 w-6" />;
-            case 'WORD': return <FileText className="h-6 w-6" />;
+            // Eliminado case 'WORD'
             case 'VIDEO': return <Video className="h-6 w-6" />;
             case 'TEST': return <CheckCircle className="h-6 w-6" />;
             case 'LINK': return <LinkIcon className="h-6 w-6" />;
@@ -87,6 +108,9 @@ const DownloadsPage = () => {
         if (!dateString) return 'Indefinido';
         return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
     };
+
+    // Determinar si puede editar (ADMIN o PROFESOR)
+    const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -237,10 +261,40 @@ const DownloadsPage = () => {
                                     {topic.materials && topic.materials.map((file) => (
                                         <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
                                             <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                                <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${file.type === 'PDF' ? 'bg-red-50 text-red-600' : file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : file.type === 'TEST' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-600'}`}>{getIcon(file.type)}</div>
-                                                <div className="min-w-0"><h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3><div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1"><span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span></div></div>
+                                                {/* ICONO COLOREADO SEGÚN TIPO (Sin Word, Con Test) */}
+                                                <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
+                                                    file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
+                                                    file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
+                                                    file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
+                                                    'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                    {getIcon(file.type)}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3>
+                                                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
+                                                        <span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">{file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}</a>
+
+                                            {/* ACCIONES (Botón Bajar + Botón Borrar) */}
+                                            <div className="flex items-center space-x-2">
+                                                <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
+                                                    {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
+                                                </a>
+                                                
+                                                {/* BOTÓN DE BORRAR (Solo si canEdit es true) */}
+                                                {canEdit && (
+                                                    <button 
+                                                        onClick={() => handleDeleteMaterial(file.id)} 
+                                                        className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm"
+                                                        title="Eliminar material"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                     {(!topic.materials || topic.materials.length === 0) && <div className="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center text-slate-400 italic text-sm">No hay materiales disponibles.</div>}
