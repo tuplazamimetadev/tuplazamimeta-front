@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Settings, CreditCard, Crown, LogOut,
-    Brain, Newspaper, Play, CheckCircle, Trash2, 
+    Brain, Newspaper, Play, CheckCircle, Trash2,
     Signal, User, Clock // Iconos visuales
 } from 'lucide-react';
 
@@ -20,9 +20,9 @@ const TestsPage = () => {
     const [loading, setLoading] = useState(true);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    
-    const [userData, setUserData] = useState({ 
-        name: 'Cargando...', email: '', role: 'Estudiante', expiration: null 
+
+    const [userData, setUserData] = useState({
+        name: 'Cargando...', email: '', role: 'Estudiante', expiration: null
     });
 
     // --- LOGOUT ---
@@ -39,24 +39,25 @@ const TestsPage = () => {
 
         fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : [])
-            .then(data => { 
-                // 1. BUSCAR EL TEMA "TESTS GENERALES"
-                const generalTopicObj = data.find(topic => 
-                    topic.title.toUpperCase().includes("TESTS GENERALES") || 
+            .then(data => {
+                // 1. BUSCAR EL TEMA "TESTS GENERALES" (o SIMULACROS)
+                const generalTopicObj = data.find(topic =>
+                    topic.title.toUpperCase().includes("TESTS GENERALES") ||
                     topic.title.toUpperCase().includes("SIMULACROS")
                 );
 
                 if (generalTopicObj) {
-                    // Guardamos el tema para pasárselo al UploadManager (así solo sale este en la lista)
+                    // Guardamos el tema para pasárselo al UploadManager
                     setUploadTopic([generalTopicObj]);
-                    
+
                     // Filtramos solo los materiales que sean tipo TEST dentro de este tema
                     const tests = (generalTopicObj.materials || []).filter(m => m.type === 'TEST');
                     setGeneralTests(tests);
                 } else {
                     setGeneralTests([]);
+                    setUploadTopic([]);
                 }
-                setLoading(false); 
+                setLoading(false);
             })
             .catch(() => setLoading(false));
     };
@@ -91,7 +92,7 @@ const TestsPage = () => {
     useEffect(() => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
-        
+
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => setUserData(data))
@@ -117,13 +118,13 @@ const TestsPage = () => {
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
                         <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <BookOpen className="h-4 w-4 mr-2"/> Temario
+                            <BookOpen className="h-4 w-4 mr-2" /> Temario
                         </button>
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">
-                            <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                            <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                         </button>
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
                         </button>
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
@@ -170,17 +171,23 @@ const TestsPage = () => {
                     {/* ZONA DE SUBIDA: Solo visible si existe el tema "TESTS GENERALES" */}
                     <div className="max-w-4xl mx-auto mb-12">
                         {uploadTopic.length > 0 ? (
-                            <UploadManager 
-                                userRole={userData.role} 
-                                topics={uploadTopic} // Pasamos SOLO el tema general
-                                onUploadSuccess={fetchContents} 
+                            <UploadManager
+                                userRole={userData.role}
+                                topics={uploadTopic}
+                                fixedType="TEST"
+                                fixedTopic={uploadTopic[0]}
+
+                                showDescription={true} // <--- AÑADIR ESTO AQUÍ
+
+                                onUploadSuccess={fetchContents}
                             />
                         ) : (
                             // Aviso para el admin si no ha creado el tema
                             canEdit && (
-                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
-                                    <p className="text-sm text-yellow-700 font-bold">
-                                        ⚠️ Atención Admin: Para subir simulacros aquí, crea un tema llamado "TESTS GENERALES" en la base de datos o desde el panel de administración.
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 rounded-r-lg">
+                                    <p className="text-sm text-yellow-700 font-bold flex items-center">
+                                        <AlertCircle className="h-5 w-5 mr-2" />
+                                        Atención Admin: Para subir simulacros aquí, crea un tema llamado "TESTS GENERALES" en la base de datos.
                                     </p>
                                 </div>
                             )
@@ -194,7 +201,7 @@ const TestsPage = () => {
                         <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
                             {generalTests.map((test) => (
                                 <article key={test.id} className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative group">
-                                    
+
                                     {/* CABECERA CON GRADIENTE */}
                                     <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 flex justify-between items-start text-white">
                                         <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
@@ -203,22 +210,24 @@ const TestsPage = () => {
                                         <span className="bg-black/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm">Simulacro</span>
                                     </div>
 
-                                    {/* CUERPO */}
+                                    {/* CUERPO CON DESCRIPCIÓN */}
                                     <div className="p-6 flex flex-col flex-grow">
                                         <h3 className="text-2xl font-bold text-slate-800 mb-2">{test.title}</h3>
+
+                                        {/* DESCRIPCIÓN DINÁMICA: Si es null muestra texto por defecto */}
                                         <p className="text-slate-500 mb-6 flex-grow text-sm">
-                                            Examen oficial tipo test. Haz clic en "Empezar" para descargar o ver el PDF.
+                                            {test.description || "Examen oficial tipo test. Haz clic en 'Empezar' para descargar o ver el PDF."}
                                         </p>
-                                        
+
                                         <div className="flex items-center space-x-6 text-sm text-slate-400 mb-6 border-t border-slate-100 pt-4">
-                                            <div className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-green-500"/> Oficial</div>
-                                            <div className="flex items-center"><Signal className="h-4 w-4 mr-2 text-yellow-500"/> General</div>
+                                            <div className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-green-500" /> Oficial</div>
+                                            <div className="flex items-center"><Signal className="h-4 w-4 mr-2 text-yellow-500" /> General</div>
                                         </div>
-                                        
+
                                         <div className="flex space-x-3">
-                                            <a 
-                                                href={test.url} 
-                                                target="_blank" 
+                                            <a
+                                                href={test.url}
+                                                target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center group"
                                             >
@@ -227,7 +236,7 @@ const TestsPage = () => {
 
                                             {/* BOTÓN BORRAR */}
                                             {canEdit && (
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={(e) => handleDeleteTest(e, test.id)}
                                                     className="bg-red-50 hover:bg-red-100 text-red-500 p-4 rounded-xl transition shadow-sm border border-red-100"

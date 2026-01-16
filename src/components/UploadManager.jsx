@@ -1,26 +1,33 @@
-import React, { useState } from 'react';
-import { Upload, Link as LinkIcon, FileText, Video, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, Link as LinkIcon, CheckCircle, AlertCircle, AlignLeft, Check } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
-    // 1. SEGURIDAD: Si no es profe/admin, no renderizamos nada
+// AÑADIDO: 'showDescription' para ocultar/mostrar el campo según la página
+const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopic, showDescription = false }) => {
+    
+    // 1. SEGURIDAD
     if (userRole !== 'ADMIN' && userRole !== 'PROFESOR') return null;
 
     // --- ESTADOS ---
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState(''); 
     const [topicId, setTopicId] = useState('');
     const [type, setType] = useState('PDF');
     
-    // Para archivos
     const [file, setFile] = useState(null);
-    // Para videos/links
     const [url, setUrl] = useState('');
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(null);
 
-    // --- MANEJADORES ---
+    // --- EFECTO PARA PROPS FIJAS ---
+    useEffect(() => {
+        if (fixedType) setType(fixedType);
+        if (fixedTopic) setTopicId(fixedTopic.id);
+    }, [fixedType, fixedTopic]);
+
+    // --- SUBMIT ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!topicId) { setMessage({type: 'error', text: 'Selecciona un tema'}); return; }
@@ -35,18 +42,19 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
             let body = null;
             let headers = { 'Authorization': `Bearer ${token}` };
 
-            // LÓGICA A: Si es VIDEO o LINK -> Enviamos JSON normal
+            // A. JSON (Video/Link)
             if (type === 'VIDEO' || type === 'LINK') {
                 endpoint = `${API_URL}/api/materials`; 
                 headers['Content-Type'] = 'application/json';
                 body = JSON.stringify({
                     title,
+                    description, // Se envía aunque esté vacío
                     type,
                     url, 
                     topicId
                 });
             } 
-            // LÓGICA B: Si es PDF o TEST -> Enviamos FormData (Archivo)
+            // B. FORMDATA (Archivo)
             else {
                 if (!file) throw new Error("Debes seleccionar un archivo");
                 endpoint = `${API_URL}/api/materials/upload`; 
@@ -54,7 +62,8 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('title', title);
-                formData.append('type', type); // Aquí enviamos 'TEST' o 'PDF'
+                formData.append('description', description); // Se envía al back
+                formData.append('type', type);
                 formData.append('topicId', topicId);
                 body = formData;
             }
@@ -67,12 +76,14 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
 
             if (!response.ok) throw new Error('Error al subir el material');
 
-            // Éxito
             setMessage({ type: 'success', text: 'Material agregado correctamente' });
+            
+            // Limpieza
             setTitle('');
+            setDescription('');
             setUrl('');
             setFile(null);
-            // Avisamos al padre para que recargue la lista
+            
             if (onUploadSuccess) onUploadSuccess();
 
         } catch (error) {
@@ -105,47 +116,79 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                         required
                         value={title}
                         onChange={e => setTitle(e.target.value)}
-                        placeholder="Ej: Examen Tema 5..." 
+                        placeholder="Ej: Tema 1..." 
                         className="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                     />
                 </div>
 
-                {/* 2. TEMA (Dropdown dinámico) */}
-                <div className="col-span-2 md:col-span-1">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Asignar al Tema</label>
-                    <select 
-                        required
-                        value={topicId}
-                        onChange={e => setTopicId(e.target.value)}
-                        className="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none bg-white"
-                    >
-                        <option value="">-- Elige un Tema --</option>
-                        {topics.map(t => (
-                            <option key={t.id} value={t.id}>Tema {t.id}: {t.title}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* 3. TIPO DE ARCHIVO (ACTUALIZADO) */}
-                <div className="col-span-2 md:col-span-1">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de Recurso</label>
-                    <div className="grid grid-cols-4 gap-2">
-                        {/* AQUÍ ESTÁ EL CAMBIO: Quitamos WORD, ponemos TEST */}
-                        {['PDF', 'TEST', 'VIDEO', 'LINK'].map((t) => (
-                            <button
-                                key={t}
-                                type="button"
-                                onClick={() => setType(t)}
-                                className={`text-xs font-bold py-2 rounded-lg border transition ${type === t ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}
-                            >
-                                {t}
-                            </button>
-                        ))}
+                {/* 2. DESCRIPCIÓN (CONDICIONAL: Solo si showDescription es true) */}
+                {showDescription && (
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Descripción (Opcional)</label>
+                        <div className="relative">
+                            <AlignLeft className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
+                            <textarea 
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Detalles, dificultad, nº preguntas..." 
+                                rows="1"
+                                className="w-full pl-10 p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition resize-none h-[50px]"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
-                {/* 4. INPUT CONDICIONAL (Archivo vs URL) */}
-                <div className="col-span-2 md:col-span-1">
+                {/* 3. TEMA (Se oculta si está fijado) */}
+                {!fixedTopic && (
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Asignar al Tema</label>
+                        <select 
+                            required
+                            value={topicId}
+                            onChange={e => setTopicId(e.target.value)}
+                            className="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 outline-none bg-white"
+                        >
+                            <option value="">-- Elige un Tema --</option>
+                            {topics.map(t => (
+                                <option key={t.id} value={t.id}>Tema {t.id}: {t.title}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {/* 4. TIPO (Se oculta si está fijado) */}
+                {!fixedType && (
+                    <div className="col-span-2 md:col-span-1">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de Recurso</label>
+                        <div className="grid grid-cols-4 gap-2">
+                            {['PDF', 'TEST', 'VIDEO', 'LINK'].map((t) => (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setType(t)}
+                                    className={`text-xs font-bold py-2 rounded-lg border transition ${type === t ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* AVISO DE CONFIGURACIÓN AUTOMÁTICA */}
+                {(fixedType || fixedTopic) && (
+                    <div className="col-span-2 bg-blue-50 text-blue-800 text-xs p-3 rounded-xl flex items-center border border-blue-100">
+                        <Check className="h-4 w-4 mr-2" />
+                        <span>
+                            Configuración automática: 
+                            {fixedType && <strong className="ml-1">Tipo {fixedType}</strong>}
+                            {fixedTopic && <span className="ml-1">en <strong>{fixedTopic.title}</strong></span>}
+                        </span>
+                    </div>
+                )}
+
+                {/* 5. ARCHIVO / URL */}
+                <div className="col-span-2">
                     <label className="block text-sm font-bold text-slate-700 mb-2">
                         {type === 'VIDEO' || type === 'LINK' ? 'Enlace (URL)' : 'Subir Archivo (PDF)'}
                     </label>
@@ -164,7 +207,6 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                         </div>
                     ) : (
                         <div className="relative">
-                            {/* Input para PDF y TEST */}
                             <input 
                                 type="file" 
                                 required
@@ -179,7 +221,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                     )}
                 </div>
 
-                {/* BOTÓN DE ENVÍO */}
+                {/* BOTÓN */}
                 <div className="col-span-2 mt-2">
                     <button 
                         type="submit" 
@@ -190,7 +232,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                     </button>
                 </div>
 
-                {/* MENSAJES DE ESTADO */}
+                {/* MENSAJES */}
                 {message && (
                     <div className={`col-span-2 p-3 rounded-xl flex items-center text-sm font-bold ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {message.type === 'success' ? <CheckCircle className="mr-2 h-5 w-5"/> : <AlertCircle className="mr-2 h-5 w-5"/>}
