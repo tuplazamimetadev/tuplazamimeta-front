@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2 // <--- AÑADIDO TRASH2
+    Brain, Newspaper, Calendar, User, Trash2
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -47,25 +47,45 @@ const DownloadsPage = () => {
             .catch(() => setLoading(false));
     };
 
-    // --- FUNCIÓN PARA BORRAR MATERIAL (NUEVA) ---
-    const handleDeleteMaterial = async (materialId) => {
-        if (!window.confirm("¿Estás seguro de que quieres eliminar este material? Esta acción no se puede deshacer.")) return;
+    // --- FUNCIÓN PARA BORRAR MATERIAL (CORREGIDA) ---
+const handleDeleteMaterial = async (e, materialId) => {
+        // 1. Evitar recarga
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("🔴 CLICK DETECTADO. ID:", materialId);
+
+        if (!window.confirm("¿Seguro?")) {
+            console.log("🔴 CANCELADO POR USUARIO");
+            return;
+        }
         
         const token = localStorage.getItem('jwt_token');
+        console.log("🔴 TOKEN RECUPERADO:", token ? "SÍ" : "NO");
+
         try {
+            console.log(`🔴 LANZANDO FETCH DELETE A: ${API_URL}/api/materials/${materialId}`);
+            
             const res = await fetch(`${API_URL}/api/materials/${materialId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
+                method: 'DELETE', // <--- AQUÍ ESTÁ LA CLAVE
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
             
+            console.log("🔴 RESPUESTA DEL SERVIDOR (STATUS):", res.status);
+
             if (res.ok) {
-                // Recargamos la lista para ver que desaparece
+                console.log("🔴 ÉXITO. RECARGANDO...");
                 fetchContents();
             } else {
-                alert("Error al eliminar el material");
+                const text = await res.text();
+                console.error("🔴 ERROR DEL SERVIDOR:", text);
+                alert("Fallo al borrar: " + res.status);
             }
         } catch (error) {
-            console.error(error);
+            console.error("🔴 ERROR DE RED:", error);
             alert("Error de conexión");
         }
     };
@@ -92,13 +112,16 @@ const DownloadsPage = () => {
         fetchContents();
     }, [navigate]);
 
-    // --- HELPERS ---
+    // --- HELPERS VISUALES ---
     const getIcon = (type) => {
-        switch (type) {
+        // Normalizamos a mayúsculas por si acaso
+        const safeType = type ? type.toUpperCase() : 'PDF';
+        
+        switch (safeType) {
             case 'PDF': return <FileText className="h-6 w-6" />;
-            // Eliminado case 'WORD'
+            case 'WORD': return <FileText className="h-6 w-6" />; // Soporte para archivos antiguos
             case 'VIDEO': return <Video className="h-6 w-6" />;
-            case 'TEST': return <CheckCircle className="h-6 w-6" />;
+            case 'TEST': return <CheckCircle className="h-6 w-6" />; // Icono TEST
             case 'LINK': return <LinkIcon className="h-6 w-6" />;
             default: return <File className="h-6 w-6" />;
         }
@@ -147,7 +170,6 @@ const DownloadsPage = () => {
                         <div className="relative hidden lg:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
                         <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /><span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span></button>
                         
-                        {/* Botón Avatar */}
                         <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
                             <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">
                                 {userData.name ? userData.name.charAt(0) : 'U'}
@@ -159,29 +181,21 @@ const DownloadsPage = () => {
                 </div>
             </nav>
 
-            {/* --- MODAL PERFIL AVANZADO --- */}
+            {/* MODAL PERFIL */}
             {isProfileOpen && (
                 <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
                     <div className="absolute top-20 right-4 w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform transition-all" onClick={e => e.stopPropagation()}>
-                        
-                        {/* Cabecera del Perfil */}
                         <div className="bg-slate-900 p-6 text-center relative">
                             <div className="h-20 w-20 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold shadow-lg border-4 border-slate-800 mb-3">
                                 {userData.name?.charAt(0)}
                             </div>
                             <h3 className="font-bold text-white text-xl">{userData.name}</h3>
                             <p className="text-slate-400 text-sm mb-3">{userData.email}</p>
-                            
-                            {/* Badge del Rol */}
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 uppercase tracking-wide">
                                 <Crown className="w-3 h-3 mr-1" /> {userData.role}
                             </span>
                         </div>
-
-                        {/* Detalles y Configuración */}
                         <div className="p-6 space-y-6">
-                            
-                            {/* Sección Suscripción */}
                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Tu Suscripción</h4>
                                 <div className="space-y-2">
@@ -192,37 +206,20 @@ const DownloadsPage = () => {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Válida hasta:</span>
                                         <span className="font-bold text-slate-800 flex items-center">
-                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> 
-                                            {formatDate(userData.expiration)}
+                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {formatDate(userData.expiration)}
                                         </span>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Sección Configuración */}
                             <div>
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Configuración</h4>
                                 <ul className="space-y-1">
-                                    <li>
-                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
-                                            <User className="w-4 h-4 mr-3" /> Editar Perfil
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
-                                            <CreditCard className="w-4 h-4 mr-3" /> Métodos de Pago
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm">
-                                            <Settings className="w-4 h-4 mr-3" /> Preferencias
-                                        </button>
-                                    </li>
+                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><User className="w-4 h-4 mr-3" /> Editar Perfil</button></li>
+                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><CreditCard className="w-4 h-4 mr-3" /> Métodos de Pago</button></li>
+                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><Settings className="w-4 h-4 mr-3" /> Preferencias</button></li>
                                 </ul>
                             </div>
                         </div>
-
-                        {/* Footer Logout */}
                         <div className="bg-slate-50 p-4 border-t border-slate-100">
                             <button onClick={handleLogout} className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 py-2 rounded-lg font-bold text-sm transition">
                                 <LogOut className="w-4 h-4 mr-2" /> Cerrar Sesión
@@ -239,7 +236,6 @@ const DownloadsPage = () => {
                     <p className="text-slate-600 mt-2">Todo el contenido de tu curso, actualizado al minuto.</p>
                 </div>
 
-                {/* --- COMPONENTE DE SUBIDA (Solo visible si es Admin/Profesor) --- */}
                 <UploadManager 
                     userRole={userData.role} 
                     topics={contents} 
@@ -261,11 +257,12 @@ const DownloadsPage = () => {
                                     {topic.materials && topic.materials.map((file) => (
                                         <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
                                             <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                                {/* ICONO COLOREADO SEGÚN TIPO (Sin Word, Con Test) */}
+                                                {/* LOGICA DE COLORES DE ICONOS */}
                                                 <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
                                                     file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
                                                     file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
                                                     file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
+                                                    file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : // LEGACY: Azul para words antiguos
                                                     'bg-gray-100 text-gray-600'
                                                 }`}>
                                                     {getIcon(file.type)}
@@ -278,17 +275,17 @@ const DownloadsPage = () => {
                                                 </div>
                                             </div>
 
-                                            {/* ACCIONES (Botón Bajar + Botón Borrar) */}
                                             <div className="flex items-center space-x-2">
                                                 <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
                                                     {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
                                                 </a>
                                                 
-                                                {/* BOTÓN DE BORRAR (Solo si canEdit es true) */}
+                                                {/* BOTÓN DE BORRAR (CORREGIDO) */}
                                                 {canEdit && (
                                                     <button 
-                                                        onClick={() => handleDeleteMaterial(file.id)} 
-                                                        className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm"
+                                                        type="button" 
+                                                        onClick={(e) => handleDeleteMaterial(e, file.id)} 
+                                                        className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
                                                         title="Eliminar material"
                                                     >
                                                         <Trash2 className="h-4 w-4" />

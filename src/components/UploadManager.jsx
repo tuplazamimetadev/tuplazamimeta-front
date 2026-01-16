@@ -37,24 +37,24 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
 
             // LÓGICA A: Si es VIDEO o LINK -> Enviamos JSON normal
             if (type === 'VIDEO' || type === 'LINK') {
-                endpoint = `${API_URL}/api/materials`; // Endpoint para crear sin subir fichero
+                endpoint = `${API_URL}/api/materials`; 
                 headers['Content-Type'] = 'application/json';
                 body = JSON.stringify({
                     title,
                     type,
-                    url, // Mandamos la URL de YouTube directa
+                    url, 
                     topicId
                 });
             } 
-            // LÓGICA B: Si es PDF o WORD -> Enviamos FormData (Archivo)
+            // LÓGICA B: Si es PDF o TEST -> Enviamos FormData (Archivo)
             else {
                 if (!file) throw new Error("Debes seleccionar un archivo");
-                endpoint = `${API_URL}/api/materials/upload`; // Endpoint de subida
-                // Nota: Al usar FormData, NO se pone Content-Type manualmente, el navegador lo pone
+                endpoint = `${API_URL}/api/materials/upload`; 
+                
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('title', title);
-                formData.append('type', type);
+                formData.append('type', type); // Aquí enviamos 'TEST' o 'PDF'
                 formData.append('topicId', topicId);
                 body = formData;
             }
@@ -105,7 +105,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                         required
                         value={title}
                         onChange={e => setTitle(e.target.value)}
-                        placeholder="Ej: Esquema Tema 5..." 
+                        placeholder="Ej: Examen Tema 5..." 
                         className="w-full p-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
                     />
                 </div>
@@ -126,11 +126,12 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                     </select>
                 </div>
 
-                {/* 3. TIPO DE ARCHIVO */}
+                {/* 3. TIPO DE ARCHIVO (ACTUALIZADO) */}
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de Recurso</label>
                     <div className="grid grid-cols-4 gap-2">
-                        {['PDF', 'WORD', 'VIDEO', 'LINK'].map((t) => (
+                        {/* AQUÍ ESTÁ EL CAMBIO: Quitamos WORD, ponemos TEST */}
+                        {['PDF', 'TEST', 'VIDEO', 'LINK'].map((t) => (
                             <button
                                 key={t}
                                 type="button"
@@ -146,7 +147,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                 {/* 4. INPUT CONDICIONAL (Archivo vs URL) */}
                 <div className="col-span-2 md:col-span-1">
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {type === 'VIDEO' || type === 'LINK' ? 'Enlace (URL)' : 'Subir Archivo'}
+                        {type === 'VIDEO' || type === 'LINK' ? 'Enlace (URL)' : 'Subir Archivo (PDF)'}
                     </label>
                     
                     {type === 'VIDEO' || type === 'LINK' ? (
@@ -163,13 +164,17 @@ const UploadManager = ({ userRole, topics, onUploadSuccess }) => {
                         </div>
                     ) : (
                         <div className="relative">
+                            {/* Input para PDF y TEST */}
                             <input 
                                 type="file" 
                                 required
                                 onChange={e => setFile(e.target.files[0])}
-                                accept={type === 'PDF' ? '.pdf' : '.doc,.docx'}
+                                accept=".pdf" 
                                 className="w-full p-2.5 rounded-xl border border-slate-200 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
+                            <p className="text-[10px] text-slate-400 mt-1 ml-1">
+                                {type === 'TEST' ? 'Sube el examen en formato PDF.' : 'Sube el documento PDF.'}
+                            </p>
                         </div>
                     )}
                 </div>
