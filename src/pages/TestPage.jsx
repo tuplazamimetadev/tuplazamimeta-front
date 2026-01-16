@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
-    BookOpen, Settings, CreditCard, Crown, LogOut,
-    Brain, Newspaper, Play, CheckCircle, Trash2,
-    Signal, User, Clock // Iconos visuales
+    BookOpen, Crown, LogOut,
+    Brain, Newspaper, Play, CheckCircle, Trash2, 
+    Signal, AlertCircle 
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
