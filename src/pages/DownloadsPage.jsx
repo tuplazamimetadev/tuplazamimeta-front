@@ -48,45 +48,50 @@ const DownloadsPage = () => {
     };
 
     // --- FUNCIÓN PARA BORRAR MATERIAL (CORREGIDA CON LOGS) ---
-    const handleDeleteMaterial = async (e, materialId) => {
-        // 1. IMPORTANTE: Evitamos que el navegador recargue la página
+const handleDeleteMaterial = async (e, materialId) => {
         e.preventDefault();
         e.stopPropagation();
 
-        console.log("🔴 INTENTO DE BORRADO - ID:", materialId);
-
-        if (!window.confirm("¿Estás seguro de que quieres eliminar este material? Esta acción no se puede deshacer.")) {
-            console.log("🔴 BORRADO CANCELADO POR EL USUARIO");
-            return;
-        }
+        if (!window.confirm("¿Estás seguro de que quieres eliminar este material?")) return;
         
         const token = localStorage.getItem('jwt_token');
         
         try {
-            console.log(`🔴 ENVIANDO DELETE A: ${API_URL}/api/materials/${materialId}`);
-            
             const res = await fetch(`${API_URL}/api/materials/${materialId}`, {
-                method: 'DELETE', // <--- Método explícito
+                method: 'DELETE',
                 headers: { 
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
             
-            console.log("🔴 RESPUESTA DEL SERVIDOR:", res.status);
-
             if (res.ok) {
-                console.log("✅ BORRADO EXITOSO. RECARGANDO LISTA...");
-                // Recargamos la lista para ver que desaparece
-                fetchContents();
+                console.log("✅ BORRADO EXITOSO (204). ACTUALIZANDO UI...");
+
+                // --- TRUCO: BORRAMOS DEL ESTADO LOCAL INMEDIATAMENTE ---
+                setContents(prevContents => {
+                    return prevContents.map(topic => {
+                        // Si el tema tiene materiales, filtramos el que hemos borrado
+                        if (topic.materials) {
+                            return {
+                                ...topic,
+                                materials: topic.materials.filter(m => m.id !== materialId)
+                            };
+                        }
+                        return topic;
+                    });
+                });
+
+                // Y luego, por si acaso, pedimos la lista al servidor en segundo plano
+                // (Si llega tarde no importa, porque ya lo hemos quitado visualmente)
+                fetchContents(); 
+
             } else {
-                const errorText = await res.text();
-                console.error("❌ ERROR DEL SERVIDOR:", errorText);
-                alert(`Error al eliminar (Status: ${res.status}). Revisa la consola.`);
+                alert("Error al eliminar");
             }
         } catch (error) {
-            console.error("❌ ERROR DE RED:", error);
-            alert("Error de conexión con el servidor.");
+            console.error(error);
+            alert("Error de conexión");
         }
     };
 
