@@ -23,7 +23,7 @@ const PracticalCasesPage = () => {
     
     // Estado del Formulario
     const [formData, setFormData] = useState({ title: '', description: '' });
-    const [selectedFile, setSelectedFile] = useState(null); // <--- NUEVO: Estado para el archivo
+    const [selectedFile, setSelectedFile] = useState(null);
 
     // --- CARGAR DATOS ---
     useEffect(() => {
@@ -32,9 +32,17 @@ const PracticalCasesPage = () => {
 
         // Fetch Usuario
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.ok ? res.json() : Promise.reject())
-            .then(data => setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration }))
-            .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno' })));
+            .then(res => res.json())
+            .then(data => {
+                setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration });
+                
+                // --- REDIRECCIÓN DE SEGURIDAD ---
+                // Si es TEST o PRUEBA, no tienen acceso a supuestos
+                if (data.role === 'TEST' || data.role === 'PRUEBA') {
+                    navigate('/noticias');
+                }
+            })
+            .catch(() => navigate('/login'));
         
         fetchCases();
     }, [navigate]);
@@ -61,7 +69,6 @@ const PracticalCasesPage = () => {
         e.preventDefault();
         const token = localStorage.getItem('jwt_token');
 
-        // 1. Usamos FormData para enviar archivo + datos
         const data = new FormData();
         data.append('title', formData.title);
         data.append('description', formData.description);
@@ -78,7 +85,6 @@ const PracticalCasesPage = () => {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
-                    // NO poner Content-Type, el navegador lo pone automático con el boundary
                 },
                 body: data
             });
@@ -89,7 +95,7 @@ const PracticalCasesPage = () => {
                 setShowForm(false);
                 fetchCases();
             } else {
-                alert("Error al subir el supuesto. Verifica el tamaño del archivo.");
+                alert("Error al subir el supuesto.");
             }
         } catch (error) {
             console.error(error);
@@ -99,7 +105,7 @@ const PracticalCasesPage = () => {
 
     // --- BORRAR SUPUESTO (ADMIN) ---
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Eliminar este supuesto práctico? Se borrará el archivo de la nube.")) return;
+        if (!window.confirm("¿Eliminar este supuesto práctico?")) return;
         const token = localStorage.getItem('jwt_token');
         try {
             const res = await fetch(`${API_URL}/api/practical-cases/${id}`, {
@@ -119,9 +125,11 @@ const PracticalCasesPage = () => {
     };
 
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
+    const canSeeTemario = userData.role !== 'SUPUESTOS';
+    const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
     
-    // Verificar si tiene acceso
-    const hasAccess = isAdmin || userData.role === 'Solo Supuestos' || userData.role === 'Opositor Completo' || userData.role === 'Administrador';
+    // El propio usuario ya está en supuestos, así que hasAccess es para ver el botón de resolver
+    const hasAccess = isAdmin || userData.role === 'Solo Supuestos' || userData.role === 'Opositor Completo' || userData.role === 'Administrador' || userData.role === 'SUPUESTOS' || userData.role === 'COMPLETO';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -137,16 +145,23 @@ const PracticalCasesPage = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <BookOpen className="h-4 w-4 mr-2"/> Temario
-                        </button>
-                        <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Brain className="h-4 w-4 mr-2"/> Tests
-                        </button>
+                        {canSeeTemario && (
+                            <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <BookOpen className="h-4 w-4 mr-2"/> Temario
+                            </button>
+                        )}
+                        
+                        {canSeeTests && (
+                            <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Brain className="h-4 w-4 mr-2"/> Tests
+                            </button>
+                        )}
+                        
                          {/* Botón Activo */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <Briefcase className="h-4 w-4 mr-2"/> Supuestos
                         </button>
+
                         <button onClick={() => navigate('/noticias')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
                         </button>
@@ -198,7 +213,7 @@ const PracticalCasesPage = () => {
                         )}
                     </div>
 
-                    {/* FORMULARIO ADMIN (MODIFICADO PARA ARCHIVOS) */}
+                    {/* FORMULARIO ADMIN */}
                     {showForm && (
                         <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-xl mb-12 border border-indigo-100 animate-in fade-in slide-in-from-top-4 duration-300">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">

@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Crown, LogOut,
     Brain, Newspaper, Play, CheckCircle, Trash2, 
-    Signal, AlertCircle, Briefcase // <--- 1. Importar icono
+    Signal, AlertCircle, Briefcase // <--- 1. Importado icono Briefcase
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -95,13 +95,25 @@ const TestsPage = () => {
 
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
-            .then(data => setUserData(data))
+            .then(data => {
+                setUserData(data);
+                
+                // --- REDIRECCIÓN DE SEGURIDAD (NUEVO) ---
+                // Si es SUPUESTOS o PRUEBA, no entra a la zona de entrenamiento
+                if (data.role === 'SUPUESTOS' || data.role === 'PRUEBA') {
+                    navigate('/noticias');
+                }
+            })
             .catch(() => navigate('/login'));
 
         fetchContents();
     }, [navigate]);
 
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
+    
+    // --- LÓGICA DE VISIBILIDAD DE BOTONES (NUEVO) ---
+    const canSeeTemario = userData.role !== 'SUPUESTOS';
+    const canSeeSupuestos = userData.role === 'ADMIN' || userData.role === 'COMPLETO' || userData.role === 'SUPUESTOS';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -116,21 +128,25 @@ const TestsPage = () => {
                         </div>
                     </div>
 
-                    {/* MENU CENTRAL */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <BookOpen className="h-4 w-4 mr-2" /> Temario
-                        </button>
+                        {/* 1. Botón Temario (Condicional) */}
+                        {canSeeTemario && (
+                            <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <BookOpen className="h-4 w-4 mr-2" /> Temario
+                            </button>
+                        )}
                         
-                        {/* ACTIVO */}
+                        {/* 2. Botón Tests (Activo - Siempre visible aquí) */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">
                             <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                         </button>
 
-                        {/* --- 2. BOTÓN AÑADIDO --- */}
-                        <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
-                        </button>
+                        {/* 3. Botón Supuestos (Condicional) */}
+                        {canSeeSupuestos && (
+                            <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Briefcase className="h-4 w-4 mr-2" /> Supuestos
+                            </button>
+                        )}
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2" /> Noticias

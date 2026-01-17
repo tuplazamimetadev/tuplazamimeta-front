@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2, Briefcase
+    Brain, Newspaper, Calendar, User, Trash2, Briefcase, Layers // <--- Iconos actualizados
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -74,9 +74,6 @@ const DownloadsPage = () => {
             });
             
             if (res.ok) {
-                console.log("✅ BORRADO EXITOSO (204). ACTUALIZANDO UI...");
-
-                // Optimistic UI Update: Borramos visualmente antes de recargar
                 setContents(prevContents => {
                     return prevContents.map(topic => {
                         if (topic.materials) {
@@ -88,10 +85,7 @@ const DownloadsPage = () => {
                         return topic;
                     });
                 });
-
-                // Sincronización en segundo plano
                 fetchContents(); 
-
             } else {
                 alert("Error al eliminar");
             }
@@ -115,6 +109,12 @@ const DownloadsPage = () => {
                     role: data.role || 'Estudiante', 
                     expiration: data.expiration
                 });
+
+                // --- REDIRECCIÓN DE SEGURIDAD ---
+                // Si el rol es "SUPUESTOS", no debería ver el temario
+                if (data.role === 'SUPUESTOS') {
+                    navigate('/supuestos');
+                }
             })
             .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno', role: 'Sin Plan' })));
 
@@ -139,26 +139,30 @@ const DownloadsPage = () => {
         return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
+    // --- PERMISOS ---
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
+    // Lógica para mostrar botones en Navbar
+    const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
+    const canSeeSupuestos = userData.role === 'ADMIN' || userData.role === 'COMPLETO' || userData.role === 'SUPUESTOS';
 
-    // --- NUEVO: FILTROS DE GRUPOS ---
-    const groupA = contents.filter(topic => topic.title.startsWith('A.'));
-    const groupB = contents.filter(topic => topic.title.startsWith('B.'));
-    const others = contents.filter(topic => !topic.title.startsWith('A.') && !topic.title.startsWith('B.'));
+    // --- AGRUPACIÓN DE TEMAS ---
+    const groupA = contents.filter(t => t.title.startsWith('A.'));
+    const groupB = contents.filter(t => t.title.startsWith('B.'));
+    const others = contents.filter(t => !t.title.startsWith('A.') && !t.title.startsWith('B.'));
 
-    // --- NUEVO: Helper para renderizar la lista (Mantiene tu diseño original de tarjeta) ---
+    // Helper para renderizar una lista de temas (para no repetir código)
     const renderTopics = (topicList) => (
         <div className="space-y-10">
             {topicList.map((topic) => (
                 <div key={topic.id} className="animate-fade-in-up">
                     <div className="flex items-center mb-6 border-b border-slate-200 pb-2">
                         <div className="bg-slate-900 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold mr-4 text-lg shadow-md">
-                            {/* Intentamos mostrar solo el número si el formato es A.XX */}
-                            {topic.title.includes(' - ') ? topic.title.split(' - ')[0].replace('A.', '').replace('B.', '') : topic.id}
+                            {/* Intenta extraer solo el número si tiene formato A.XX */}
+                            {topic.title.includes(' - ') ? topic.title.split(' - ')[0].replace(/[AB]\./, '') : topic.id}
                         </div>
                         <div>
                             <h2 className="text-xl md:text-2xl font-bold text-slate-800">
-                                {/* Mostramos el título limpio sin el código inicial si existe guion */}
+                                {/* Muestra el título limpio sin el prefijo */}
                                 {topic.title.includes(' - ') ? topic.title.split(' - ')[1] : topic.title}
                             </h2>
                             <p className="text-slate-500 text-sm hidden md:block">{topic.description}</p>
@@ -224,20 +228,24 @@ const DownloadsPage = () => {
                         </div>
                     </div>
 
-                    {/* Menú Central */}
+                    {/* Menú Central (CON LÓGICA DE ROLES) */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        {/* Botón Activo */}
+                        {/* Botón Activo (Temario) - Siempre visible aquí pues es la página actual */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <BookOpen className="h-4 w-4 mr-2"/> Temario
                         </button>
                         
-                        <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
-                        </button>
+                        {canSeeTests && (
+                            <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                            </button>
+                        )}
 
-                        <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
-                        </button>
+                        {canSeeSupuestos && (
+                            <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                            </button>
+                        )}
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
@@ -296,19 +304,11 @@ const DownloadsPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Configuración</h4>
-                                <ul className="space-y-1">
-                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><User className="w-4 h-4 mr-3" /> Editar Perfil</button></li>
-                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><CreditCard className="w-4 h-4 mr-3" /> Métodos de Pago</button></li>
-                                    <li><button className="w-full flex items-center p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-blue-600 transition text-sm"><Settings className="w-4 h-4 mr-3" /> Preferencias</button></li>
-                                </ul>
+                            <div className="bg-slate-50 p-4 border-t border-slate-100">
+                                <button onClick={handleLogout} className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 py-2 rounded-lg font-bold text-sm transition">
+                                    <LogOut className="w-4 h-4 mr-2" /> Cerrar Sesión
+                                </button>
                             </div>
-                        </div>
-                        <div className="bg-slate-50 p-4 border-t border-slate-100">
-                            <button onClick={handleLogout} className="w-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-50 py-2 rounded-lg font-bold text-sm transition">
-                                <LogOut className="w-4 h-4 mr-2" /> Cerrar Sesión
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -335,9 +335,12 @@ const DownloadsPage = () => {
                         {/* SECCIÓN GRUPO A */}
                         {groupA.length > 0 && (
                             <div className="mb-12">
-                                <h2 className="text-2xl font-black text-slate-800 mb-6 pb-2 border-b-4 border-blue-500 inline-block uppercase tracking-tight">
-                                    Grupo A: Materias Comunes
-                                </h2>
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-blue-500">
+                                    <Layers className="h-8 w-8 text-blue-500" />
+                                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                                        Grupo A: Materias Comunes
+                                    </h2>
+                                </div>
                                 {renderTopics(groupA)}
                             </div>
                         )}
@@ -345,14 +348,17 @@ const DownloadsPage = () => {
                         {/* SECCIÓN GRUPO B */}
                         {groupB.length > 0 && (
                             <div className="mb-12">
-                                <h2 className="text-2xl font-black text-slate-800 mb-6 pb-2 border-b-4 border-indigo-500 inline-block uppercase tracking-tight">
-                                    Grupo B: Materias Específicas
-                                </h2>
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-indigo-500">
+                                    <Layers className="h-8 w-8 text-indigo-500" />
+                                    <h2 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                                        Grupo B: Materias Específicas
+                                    </h2>
+                                </div>
                                 {renderTopics(groupB)}
                             </div>
                         )}
 
-                        {/* SECCIÓN OTROS (Por si acaso queda algo suelto) */}
+                        {/* SECCIÓN OTROS */}
                         {others.length > 0 && (
                             <div className="mb-12">
                                 <h2 className="text-2xl font-black text-slate-400 mb-6 pb-2 border-b-4 border-slate-300 inline-block uppercase tracking-tight">
@@ -363,8 +369,8 @@ const DownloadsPage = () => {
                         )}
 
                         {contents.length === 0 && (
-                            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                                <p className="text-slate-400 font-medium">No hay contenido disponible todavía.</p>
+                            <div className="text-center py-20 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                                <p className="text-slate-400 font-medium">No hay contenido disponible.</p>
                             </div>
                         )}
                     </div>
