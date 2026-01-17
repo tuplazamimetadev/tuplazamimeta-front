@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2, Briefcase // <--- 1. IMPORTAMOS EL ICONO
+    Brain, Newspaper, Calendar, User, Trash2, Briefcase
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -141,6 +141,76 @@ const DownloadsPage = () => {
 
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
+    // --- NUEVO: FILTROS DE GRUPOS ---
+    const groupA = contents.filter(topic => topic.title.startsWith('A.'));
+    const groupB = contents.filter(topic => topic.title.startsWith('B.'));
+    const others = contents.filter(topic => !topic.title.startsWith('A.') && !topic.title.startsWith('B.'));
+
+    // --- NUEVO: Helper para renderizar la lista (Mantiene tu diseño original de tarjeta) ---
+    const renderTopics = (topicList) => (
+        <div className="space-y-10">
+            {topicList.map((topic) => (
+                <div key={topic.id} className="animate-fade-in-up">
+                    <div className="flex items-center mb-6 border-b border-slate-200 pb-2">
+                        <div className="bg-slate-900 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold mr-4 text-lg shadow-md">
+                            {/* Intentamos mostrar solo el número si el formato es A.XX */}
+                            {topic.title.includes(' - ') ? topic.title.split(' - ')[0].replace('A.', '').replace('B.', '') : topic.id}
+                        </div>
+                        <div>
+                            <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+                                {/* Mostramos el título limpio sin el código inicial si existe guion */}
+                                {topic.title.includes(' - ') ? topic.title.split(' - ')[1] : topic.title}
+                            </h2>
+                            <p className="text-slate-500 text-sm hidden md:block">{topic.description}</p>
+                        </div>
+                        {topic.isPremium && <span className="ml-auto bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-sm"><Lock className="h-3 w-3 mr-1" /> PREMIUM</span>}
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+                        {topic.materials && topic.materials.map((file) => (
+                            <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
+                                <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
+                                    <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
+                                        file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
+                                        file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
+                                        file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
+                                        file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : 
+                                        'bg-gray-100 text-gray-600'
+                                    }`}>
+                                        {getIcon(file.type)}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3>
+                                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
+                                            <span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
+                                        {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
+                                    </a>
+                                    
+                                    {canEdit && (
+                                        <button 
+                                            type="button" 
+                                            onClick={(e) => handleDeleteMaterial(e, file.id)} 
+                                            className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
+                                            title="Eliminar material"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {(!topic.materials || topic.materials.length === 0) && <div className="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center text-slate-400 italic text-sm">No hay materiales disponibles.</div>}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
             {/* NAVBAR */}
@@ -156,7 +226,7 @@ const DownloadsPage = () => {
 
                     {/* Menú Central */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        {/* Botón Activo (Temario) */}
+                        {/* Botón Activo */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <BookOpen className="h-4 w-4 mr-2"/> Temario
                         </button>
@@ -165,7 +235,6 @@ const DownloadsPage = () => {
                             <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
                         </button>
 
-                        {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
                         <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Briefcase className="h-4 w-4 mr-2"/> Supuestos
                         </button>
@@ -261,58 +330,43 @@ const DownloadsPage = () => {
                 {loading && <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto mb-4"></div><p className="text-slate-500">Cargando tu temario...</p></div>}
                 
                 {!loading && (
-                    <div className="space-y-10 max-w-6xl mx-auto">
-                        {contents.map((topic) => (
-                            <div key={topic.id} className="animate-fade-in-up">
-                                <div className="flex items-center mb-6 border-b border-slate-200 pb-2">
-                                    <div className="bg-slate-900 text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold mr-4 text-lg shadow-md">{topic.id}</div>
-                                    <div><h2 className="text-xl md:text-2xl font-bold text-slate-800">{topic.title}</h2><p className="text-slate-500 text-sm hidden md:block">{topic.description}</p></div>
-                                    {topic.isPremium && <span className="ml-auto bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-sm"><Lock className="h-3 w-3 mr-1" /> PREMIUM</span>}
-                                </div>
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                                    {topic.materials && topic.materials.map((file) => (
-                                        <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
-                                            <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                                <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
-                                                    file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
-                                                    file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
-                                                    file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
-                                                    file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : 
-                                                    'bg-gray-100 text-gray-600'
-                                                }`}>
-                                                    {getIcon(file.type)}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3>
-                                                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
-                                                        <span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center space-x-2">
-                                                <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
-                                                    {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
-                                                </a>
-                                                
-                                                {/* BOTÓN DE BORRAR */}
-                                                {canEdit && (
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={(e) => handleDeleteMaterial(e, file.id)} 
-                                                        className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
-                                                        title="Eliminar material"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {(!topic.materials || topic.materials.length === 0) && <div className="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center text-slate-400 italic text-sm">No hay materiales disponibles.</div>}
-                                </div>
+                    <div className="max-w-6xl mx-auto">
+                        
+                        {/* SECCIÓN GRUPO A */}
+                        {groupA.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-black text-slate-800 mb-6 pb-2 border-b-4 border-blue-500 inline-block uppercase tracking-tight">
+                                    Grupo A: Materias Comunes
+                                </h2>
+                                {renderTopics(groupA)}
                             </div>
-                        ))}
+                        )}
+
+                        {/* SECCIÓN GRUPO B */}
+                        {groupB.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-black text-slate-800 mb-6 pb-2 border-b-4 border-indigo-500 inline-block uppercase tracking-tight">
+                                    Grupo B: Materias Específicas
+                                </h2>
+                                {renderTopics(groupB)}
+                            </div>
+                        )}
+
+                        {/* SECCIÓN OTROS (Por si acaso queda algo suelto) */}
+                        {others.length > 0 && (
+                            <div className="mb-12">
+                                <h2 className="text-2xl font-black text-slate-400 mb-6 pb-2 border-b-4 border-slate-300 inline-block uppercase tracking-tight">
+                                    Material Adicional
+                                </h2>
+                                {renderTopics(others)}
+                            </div>
+                        )}
+
+                        {contents.length === 0 && (
+                            <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                                <p className="text-slate-400 font-medium">No hay contenido disponible todavía.</p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
