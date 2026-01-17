@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Menu, X, CheckCircle, Crown, CreditCard, ArrowLeft,
-  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, FileText // <--- Añadido FileText para el icono
+  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, Briefcase, FileText // <--- 1. Importado Briefcase
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -42,7 +42,7 @@ const PlanesPage = () => {
     .then(data => {
       let internalRole = 'STUDENT';
       if (data.role === 'Solo Test') internalRole = 'TEST';
-      if (data.role === 'Solo Supuestos') internalRole = 'PRACTICAL'; // <--- NUEVO ROL DETECTADO
+      if (data.role === 'Solo Supuestos') internalRole = 'PRACTICAL';
       if (data.role === 'Opositor Completo') internalRole = 'PREMIUM';
       if (data.role === 'Administrador') internalRole = 'ADMIN';
 
@@ -66,7 +66,7 @@ const PlanesPage = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
       
       {/* ==================================================================
-           1. NAVBAR UNIFICADA
+           1. NAVBAR UNIFICADA (ACTUALIZADA)
       ================================================================== */}
       <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
         <div className="container mx-auto flex justify-between items-center">
@@ -97,6 +97,14 @@ const PlanesPage = () => {
                 <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
             </button>
 
+            {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
+            <button 
+                onClick={() => navigate('/supuestos')} 
+                className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+            >
+                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+            </button>
+
             <button 
                 onClick={() => navigate('/noticias')} 
                 className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
@@ -106,6 +114,7 @@ const PlanesPage = () => {
 
             <div className="w-px h-6 bg-slate-700 mx-2"></div>
 
+            {/* Botón MI PLAN (ACTIVO) */}
             <button
                 className="px-4 py-2 rounded-md bg-yellow-500 text-slate-900 font-bold text-sm transition flex items-center shadow-sm"
             >

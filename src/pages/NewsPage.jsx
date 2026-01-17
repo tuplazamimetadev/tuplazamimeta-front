@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, LogOut, Crown,
-    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink
+    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase // <--- 1. Importar Icono
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -101,7 +101,7 @@ const NewsPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            {/* NAVBAR UNIFICADA (Mantenida exactamente igual) */}
+            {/* NAVBAR UNIFICADA */}
             <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
                 <div className="container mx-auto flex justify-between items-center">
                     <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
@@ -119,6 +119,13 @@ const NewsPage = () => {
                         <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
                         </button>
+                        
+                        {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
+                        <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                        </button>
+
+                        {/* ACTIVO */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
                         </button>
@@ -134,6 +141,7 @@ const NewsPage = () => {
                             <span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span>
                         </button>
                     </div>
+                    <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
                 </div>
             </nav>
 
@@ -151,9 +159,9 @@ const NewsPage = () => {
                 </div>
             )}
 
-            {/* CONTENIDO PRINCIPAL */}
+            {/* CONTENIDO PRINCIPAL: NOTICIAS */}
             <div className="container mx-auto px-6 py-12">
-                <div className="max-w-5xl mx-auto">
+                <div className="animate-fade-in-up max-w-5xl mx-auto">
                     <div className="mb-10 text-center">
                         <h1 className="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">
                             <Megaphone className="h-8 w-8 text-blue-600" /> Tablón de Anuncios
@@ -200,6 +208,7 @@ const NewsPage = () => {
                         </div>
                     )}
 
+                    {/* Lista de Noticias */}
                     {loading ? (
                         <div className="text-center py-20 text-slate-400">Cargando noticias...</div>
                     ) : (

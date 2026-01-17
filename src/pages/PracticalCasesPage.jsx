@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, Crown, LogOut,
-    Briefcase, FileText, CheckCircle, PlusCircle, Trash2, Send, ExternalLink, PlayCircle, Newspaper
+    Briefcase, FileText, CheckCircle, PlusCircle, Trash2, Send, ExternalLink, PlayCircle, Newspaper, UploadCloud
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -20,7 +20,10 @@ const PracticalCasesPage = () => {
     const [casesList, setCasesList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({ title: '', description: '', url: '' });
+    
+    // Estado del Formulario
+    const [formData, setFormData] = useState({ title: '', description: '' });
+    const [selectedFile, setSelectedFile] = useState(null); // <--- NUEVO: Estado para el archivo
 
     // --- CARGAR DATOS ---
     useEffect(() => {
@@ -57,28 +60,46 @@ const PracticalCasesPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('jwt_token');
+
+        // 1. Usamos FormData para enviar archivo + datos
+        const data = new FormData();
+        data.append('title', formData.title);
+        data.append('description', formData.description);
+        
+        if (selectedFile) {
+            data.append('file', selectedFile);
+        } else {
+            alert("Por favor selecciona un archivo PDF o Vídeo.");
+            return;
+        }
+
         try {
             const res = await fetch(`${API_URL}/api/practical-cases`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${token}`
+                    // NO poner Content-Type, el navegador lo pone automático con el boundary
                 },
-                body: JSON.stringify(formData)
+                body: data
             });
+
             if (res.ok) {
-                setFormData({ title: '', description: '', url: '' });
+                setFormData({ title: '', description: '' });
+                setSelectedFile(null);
                 setShowForm(false);
                 fetchCases();
+            } else {
+                alert("Error al subir el supuesto. Verifica el tamaño del archivo.");
             }
         } catch (error) {
-            alert("Error al crear el supuesto");
+            console.error(error);
+            alert("Error de conexión al subir.");
         }
     };
 
     // --- BORRAR SUPUESTO (ADMIN) ---
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Eliminar este supuesto práctico?")) return;
+        if (!window.confirm("¿Eliminar este supuesto práctico? Se borrará el archivo de la nube.")) return;
         const token = localStorage.getItem('jwt_token');
         try {
             const res = await fetch(`${API_URL}/api/practical-cases/${id}`, {
@@ -99,8 +120,7 @@ const PracticalCasesPage = () => {
 
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
     
-    // Verificar si tiene acceso (ADMIN, OPOSITOR COMPLETO o SOLO SUPUESTOS)
-    // Nota: Ajusta estos strings según cómo guardes los roles en tu BD ("Solo Supuestos", "Opositor Completo", etc.)
+    // Verificar si tiene acceso
     const hasAccess = isAdmin || userData.role === 'Solo Supuestos' || userData.role === 'Opositor Completo' || userData.role === 'Administrador';
 
     return (
@@ -178,30 +198,49 @@ const PracticalCasesPage = () => {
                         )}
                     </div>
 
-                    {/* FORMULARIO ADMIN */}
+                    {/* FORMULARIO ADMIN (MODIFICADO PARA ARCHIVOS) */}
                     {showForm && (
                         <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-xl mb-12 border border-indigo-100 animate-in fade-in slide-in-from-top-4 duration-300">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
                                 <Send className="h-5 w-5 text-indigo-500" /> Crear Caso Práctico
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <input 
-                                    type="text" required placeholder="Título del caso (ej: Intervención en vía pública)"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
-                                />
-                                <textarea 
-                                    required rows="4" placeholder="Descripción breve del planteamiento..."
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
-                                />
-                                <input 
-                                    type="url" placeholder="Enlace al PDF o Vídeo (https://...)"
-                                    className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
-                                    value={formData.url} onChange={e => setFormData({...formData, url: e.target.value})}
-                                />
-                                <button className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg">
-                                    Publicar Caso
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Título</label>
+                                    <input 
+                                        type="text" required placeholder="Ej: Intervención en vía pública"
+                                        className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none mt-1"
+                                        value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase">Descripción</label>
+                                    <textarea 
+                                        required rows="4" placeholder="Planteamiento breve..."
+                                        className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none mt-1"
+                                        value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
+                                    />
+                                </div>
+
+                                {/* INPUT DE ARCHIVO */}
+                                <div className="border-2 border-dashed border-indigo-200 rounded-xl p-6 text-center hover:bg-indigo-50 transition cursor-pointer relative">
+                                    <input 
+                                        type="file" 
+                                        required
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                        onChange={(e) => setSelectedFile(e.target.files[0])}
+                                    />
+                                    <div className="flex flex-col items-center justify-center text-indigo-500">
+                                        <UploadCloud className="h-8 w-8 mb-2" />
+                                        <span className="font-bold text-sm">
+                                            {selectedFile ? selectedFile.name : "Haz clic para subir PDF o Vídeo"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button className="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition shadow-lg flex justify-center items-center">
+                                    {selectedFile ? 'Subir y Publicar' : 'Selecciona un archivo'}
                                 </button>
                             </form>
                         </div>
@@ -236,7 +275,7 @@ const PracticalCasesPage = () => {
                                         {item.description}
                                     </p>
 
-                                    {/* Botón de Acción (Bloqueado si no tiene plan) */}
+                                    {/* Botón de Acción */}
                                     {hasAccess ? (
                                         <a 
                                             href={item.url} target="_blank" rel="noopener noreferrer"
