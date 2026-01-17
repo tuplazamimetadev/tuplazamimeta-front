@@ -37,7 +37,7 @@ const PracticalCasesPage = () => {
                 setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration });
                 
                 // --- REDIRECCIÓN DE SEGURIDAD ---
-                // Si es TEST o PRUEBA, no tienen acceso a supuestos
+                // Si el rol es TEST o PRUEBA, no tienen acceso a supuestos y se les expulsa
                 if (data.role === 'TEST' || data.role === 'PRUEBA') {
                     navigate('/noticias');
                 }
@@ -125,11 +125,11 @@ const PracticalCasesPage = () => {
     };
 
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-    const canSeeTemario = userData.role !== 'SUPUESTOS';
-    const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
     
-    // El propio usuario ya está en supuestos, así que hasAccess es para ver el botón de resolver
-    const hasAccess = isAdmin || userData.role === 'Solo Supuestos' || userData.role === 'Opositor Completo' || userData.role === 'Administrador' || userData.role === 'SUPUESTOS' || userData.role === 'COMPLETO';
+    // Visibilidad del Menú
+    const canSeeTemario = userData.role !== 'SUPUESTOS';
+    // SUPUESTOS y PRUEBA no ven Tests
+    const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -290,22 +290,13 @@ const PracticalCasesPage = () => {
                                         {item.description}
                                     </p>
 
-                                    {/* Botón de Acción */}
-                                    {hasAccess ? (
-                                        <a 
-                                            href={item.url} target="_blank" rel="noopener noreferrer"
-                                            className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
-                                        >
-                                            <PlayCircle className="h-5 w-5" /> Resolver Caso
-                                        </a>
-                                    ) : (
-                                        <button 
-                                            onClick={() => navigate('/suscripcion')}
-                                            className="w-full bg-slate-100 text-slate-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-200 hover:text-slate-600 transition"
-                                        >
-                                            <Crown className="h-4 w-4" /> Disponible en Premium
-                                        </button>
-                                    )}
+                                    {/* Botón de Acción - SIEMPRE VISIBLE PARA QUIEN ESTÁ AQUÍ */}
+                                    <a 
+                                        href={item.url} target="_blank" rel="noopener noreferrer"
+                                        className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+                                    >
+                                        <PlayCircle className="h-5 w-5" /> Resolver Caso
+                                    </a>
                                 </article>
                             ))}
                         </div>
