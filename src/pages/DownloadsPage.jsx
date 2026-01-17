@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2
+    Brain, Newspaper, Calendar, User, Trash2, Briefcase // <--- 1. IMPORTAMOS EL ICONO
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -44,8 +44,6 @@ const DownloadsPage = () => {
         fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : [])
             .then(data => { 
-                // --- FILTRO IMPORTANTE ---
-                // Ocultamos el tema especial de Tests para que no salga aquí
                 const filteredData = data.filter(topic => 
                     !topic.title.toUpperCase().includes("TESTS GENERALES") && 
                     !topic.title.toUpperCase().includes("SIMULACROS")
@@ -108,7 +106,6 @@ const DownloadsPage = () => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
 
-        // 1. Obtener Datos del Usuario
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
@@ -121,7 +118,6 @@ const DownloadsPage = () => {
             })
             .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno', role: 'Sin Plan' })));
 
-        // 2. Cargar Contenidos Iniciales
         fetchContents();
     }, [navigate]);
 
@@ -160,16 +156,26 @@ const DownloadsPage = () => {
 
                     {/* Menú Central */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                        {/* Botón Activo (Temario) */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
                             <BookOpen className="h-4 w-4 mr-2"/> Temario
                         </button>
+                        
                         <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
                         </button>
+
+                        {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
+                        <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                        </button>
+
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
                         </button>
+                        
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
+                        
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
                             <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
                         </button>
@@ -248,7 +254,7 @@ const DownloadsPage = () => {
 
                 <UploadManager 
                     userRole={userData.role} 
-                    topics={contents} // Solo se enviarán los temas filtrados
+                    topics={contents} 
                     onUploadSuccess={fetchContents} 
                 />
 
