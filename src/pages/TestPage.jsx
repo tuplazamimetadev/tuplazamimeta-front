@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Crown, LogOut,
     Brain, Newspaper, Play, CheckCircle, Trash2, 
-    Signal, AlertCircle, Briefcase // <--- 1. Importado icono Briefcase
+    Signal, AlertCircle, Briefcase // <--- 1. Importar icono
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -98,9 +98,9 @@ const TestsPage = () => {
             .then(data => {
                 setUserData(data);
                 
-                // --- REDIRECCIÓN DE SEGURIDAD (NUEVO) ---
-                // Si es SUPUESTOS o PRUEBA, no entra a la zona de entrenamiento
-                if (data.role === 'SUPUESTOS' || data.role === 'PRUEBA') {
+                // --- REDIRECCIÓN DE SEGURIDAD ---
+                // Si el rol es SUPUESTOS, no entra aquí. PRUEBA entra pero no ve tests (lista vacía).
+                if (data.role === 'SUPUESTOS') {
                     navigate('/noticias');
                 }
             })
@@ -111,9 +111,9 @@ const TestsPage = () => {
 
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
     
-    // --- LÓGICA DE VISIBILIDAD DE BOTONES (NUEVO) ---
+    // --- LÓGICA DE VISIBILIDAD DE BOTONES ---
     const canSeeTemario = userData.role !== 'SUPUESTOS';
-    const canSeeSupuestos = userData.role === 'ADMIN' || userData.role === 'COMPLETO' || userData.role === 'SUPUESTOS';
+    const canSeeSupuestos = userData.role !== 'TEST'; // TEST no ve supuestos
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -129,6 +129,7 @@ const TestsPage = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
+                        
                         {/* 1. Botón Temario (Condicional) */}
                         {canSeeTemario && (
                             <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">

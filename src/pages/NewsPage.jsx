@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, LogOut, Crown,
-    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase // <--- 1. Importar Icono
+    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -16,13 +16,12 @@ const NewsPage = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
     
-    // Estados de Noticias
     const [newsList, setNewsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({ title: '', description: '', link: '' });
 
-    // --- CARGAR DATOS DEL USUARIO ---
+    // --- CARGAR DATOS ---
     useEffect(() => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
@@ -35,7 +34,6 @@ const NewsPage = () => {
         fetchNews();
     }, [navigate]);
 
-    // --- FETCH NOTICIAS DEL BACKEND ---
     const fetchNews = async () => {
         const token = localStorage.getItem('jwt_token');
         try {
@@ -53,7 +51,6 @@ const NewsPage = () => {
         }
     };
 
-    // --- CREAR NOTICIA (ADMIN) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('jwt_token');
@@ -76,7 +73,6 @@ const NewsPage = () => {
         }
     };
 
-    // --- BORRAR NOTICIA (ADMIN) ---
     const handleDelete = async (id) => {
         if (!window.confirm("¿Seguro que quieres borrar esta noticia?")) return;
         const token = localStorage.getItem('jwt_token');
@@ -99,9 +95,16 @@ const NewsPage = () => {
 
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
+    // --- LÓGICA DE VISIBILIDAD NAVBAR ---
+    // SUPUESTOS: No ve Temario ni Tests
+    const canSeeTemario = userData.role !== 'SUPUESTOS';
+    const canSeeTests = userData.role !== 'SUPUESTOS';
+    // TEST: No ve Supuestos
+    const canSeeSupuestos = userData.role !== 'TEST';
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            {/* NAVBAR UNIFICADA */}
+            {/* NAVBAR */}
             <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
                 <div className="container mx-auto flex justify-between items-center">
                     <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
@@ -113,17 +116,23 @@ const NewsPage = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <BookOpen className="h-4 w-4 mr-2"/> Temario
-                        </button>
-                        <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
-                        </button>
+                        {canSeeTemario && (
+                            <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <BookOpen className="h-4 w-4 mr-2"/> Temario
+                            </button>
+                        )}
                         
-                        {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
-                        <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
-                        </button>
+                        {canSeeTests && (
+                            <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                            </button>
+                        )}
+                        
+                        {canSeeSupuestos && (
+                            <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
+                                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                            </button>
+                        )}
 
                         {/* ACTIVO */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
@@ -159,7 +168,7 @@ const NewsPage = () => {
                 </div>
             )}
 
-            {/* CONTENIDO PRINCIPAL: NOTICIAS */}
+            {/* CONTENIDO PRINCIPAL */}
             <div className="container mx-auto px-6 py-12">
                 <div className="animate-fade-in-up max-w-5xl mx-auto">
                     <div className="mb-10 text-center">
@@ -168,7 +177,6 @@ const NewsPage = () => {
                         </h1>
                         <p className="text-slate-600 mt-2">Últimas novedades sobre la oposición en Castilla y León.</p>
                         
-                        {/* Botón Nueva Noticia (Solo Admin) */}
                         {isAdmin && (
                             <button 
                                 onClick={() => setShowForm(!showForm)}
@@ -179,7 +187,6 @@ const NewsPage = () => {
                         )}
                     </div>
 
-                    {/* Formulario de Creación (Solo Admin) */}
                     {showForm && (
                         <div className="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-xl mb-12 border border-slate-100 animate-in fade-in slide-in-from-top-4 duration-300">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800">
@@ -208,7 +215,6 @@ const NewsPage = () => {
                         </div>
                     )}
 
-                    {/* Lista de Noticias */}
                     {loading ? (
                         <div className="text-center py-20 text-slate-400">Cargando noticias...</div>
                     ) : (
@@ -216,7 +222,6 @@ const NewsPage = () => {
                             {newsList.map((news) => (
                                 <article key={news.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 hover:shadow-lg transition duration-300 relative overflow-hidden group">
                                     <div className="absolute top-0 left-0 bottom-0 w-2 bg-blue-500"></div>
-
                                     <div className="flex flex-col md:flex-row md:items-start justify-between pl-4">
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-4">

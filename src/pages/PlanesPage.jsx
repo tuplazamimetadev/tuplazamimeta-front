@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Menu, X, CheckCircle, Crown, CreditCard, ArrowLeft,
-  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, Briefcase, FileText // <--- 1. Importado Briefcase
+  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, Briefcase, FileText 
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -62,6 +62,13 @@ const PlanesPage = () => {
     alert(`¡Genial! Has seleccionado el plan: ${planName}.\n\nAquí se abriría la pasarela de pago (Stripe/PayPal).`);
   };
 
+  // --- LÓGICA DE VISIBILIDAD NAVBAR ---
+  // SUPUESTOS (PRACTICAL): No ve Temario ni Tests
+  const canSeeTemario = userData.role !== 'PRACTICAL';
+  const canSeeTests = userData.role !== 'PRACTICAL';
+  // TEST: No ve Supuestos
+  const canSeeSupuestos = userData.role !== 'TEST';
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
       
@@ -83,27 +90,33 @@ const PlanesPage = () => {
           {/* Menú Central */}
           <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
             
-            <button 
-                onClick={() => navigate('/descargas')}
-                className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
-            >
-                <BookOpen className="h-4 w-4 mr-2"/> Temario
-            </button>
+            {canSeeTemario && (
+                <button 
+                    onClick={() => navigate('/descargas')}
+                    className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                >
+                    <BookOpen className="h-4 w-4 mr-2"/> Temario
+                </button>
+            )}
 
-            <button 
-                onClick={() => navigate('/tests')} 
-                className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
-            >
-                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
-            </button>
+            {canSeeTests && (
+                <button 
+                    onClick={() => navigate('/tests')} 
+                    className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                >
+                    <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                </button>
+            )}
 
-            {/* --- 2. BOTÓN DE SUPUESTOS AÑADIDO --- */}
-            <button 
-                onClick={() => navigate('/supuestos')} 
-                className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
-            >
-                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
-            </button>
+            {/* --- 2. BOTÓN DE SUPUESTOS --- */}
+            {canSeeSupuestos && (
+                <button 
+                    onClick={() => navigate('/supuestos')} 
+                    className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                >
+                    <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                </button>
+            )}
 
             <button 
                 onClick={() => navigate('/noticias')} 
