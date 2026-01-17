@@ -10,7 +10,7 @@ import TarifasPage from './pages/TarifasPage';
 import PlanesPage from './pages/PlanesPage';
 import TestsPage from './pages/TestPage';
 import NewsPage from './pages/NewsPage'; 
-
+import PracticalCasesPage from './pages/PracticalCasesPage';
 function App() {
   return (
     <Router>
@@ -24,6 +24,7 @@ function App() {
         <Route path="/tests" element={<TestsPage />} />
         <Route path="/descargas" element={<DownloadsPage />} />
         <Route path="/noticias" element={<NewsPage />} /> {}
+        <Route path="/supuestos" element={<PracticalCasesPage />} />
       </Routes>
     </Router>
   );

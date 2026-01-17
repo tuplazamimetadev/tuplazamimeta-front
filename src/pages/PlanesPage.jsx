@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Menu, X, CheckCircle, Crown, CreditCard, ArrowLeft,
-  // Iconos de navegación actualizados
-  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper
+  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, FileText // <--- Añadido FileText para el icono
 } from 'lucide-react';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const PlanesPage = () => {
   const navigate = useNavigate();
   
@@ -41,6 +42,7 @@ const PlanesPage = () => {
     .then(data => {
       let internalRole = 'STUDENT';
       if (data.role === 'Solo Test') internalRole = 'TEST';
+      if (data.role === 'Solo Supuestos') internalRole = 'PRACTICAL'; // <--- NUEVO ROL DETECTADO
       if (data.role === 'Opositor Completo') internalRole = 'PREMIUM';
       if (data.role === 'Administrador') internalRole = 'ADMIN';
 
@@ -64,7 +66,7 @@ const PlanesPage = () => {
     <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
       
       {/* ==================================================================
-           1. NAVBAR UNIFICADA (ACTUALIZADA)
+           1. NAVBAR UNIFICADA
       ================================================================== */}
       <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
         <div className="container mx-auto flex justify-between items-center">
@@ -81,7 +83,6 @@ const PlanesPage = () => {
           {/* Menú Central */}
           <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
             
-            {/* Botón TEMARIO (Link a /descargas) */}
             <button 
                 onClick={() => navigate('/descargas')}
                 className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
@@ -89,7 +90,6 @@ const PlanesPage = () => {
                 <BookOpen className="h-4 w-4 mr-2"/> Temario
             </button>
 
-            {/* Botón TESTS (Link a /tests) */}
             <button 
                 onClick={() => navigate('/tests')} 
                 className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
@@ -97,7 +97,6 @@ const PlanesPage = () => {
                 <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
             </button>
 
-            {/* Botón NOTICIAS (Link a /noticias) - NUEVO */}
             <button 
                 onClick={() => navigate('/noticias')} 
                 className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
@@ -105,10 +104,8 @@ const PlanesPage = () => {
                 <Newspaper className="h-4 w-4 mr-2"/> Noticias
             </button>
 
-            {/* Separador */}
             <div className="w-px h-6 bg-slate-700 mx-2"></div>
 
-            {/* Botón MI PLAN (ACTIVO) */}
             <button
                 className="px-4 py-2 rounded-md bg-yellow-500 text-slate-900 font-bold text-sm transition flex items-center shadow-sm"
             >
@@ -118,19 +115,16 @@ const PlanesPage = () => {
 
           {/* Área Personal Derecha */}
           <div className="hidden md:flex items-center space-x-4">
-              {/* Buscador */}
               <div className="relative hidden lg:block">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input type="text" placeholder="Buscar..." className="bg-slate-800 border-none rounded-full pl-10 pr-4 py-2 text-sm text-white focus:ring-2 focus:ring-blue-500 w-32 focus:w-48 transition-all" />
               </div>
 
-              {/* Notificaciones */}
               <button className="relative p-2 text-slate-400 hover:text-white transition">
                   <Bell className="h-6 w-6" />
                   <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
               </button>
 
-              {/* Avatar */}
               <div className="relative">
                   <button
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -209,11 +203,11 @@ const PlanesPage = () => {
           <p className="text-slate-600 mt-2">Mejora tu plan para acceder a más contenidos.</p>
         </div>
 
-        {/* GRID DE PLANES */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto items-start animate-fade-in-up">
+        {/* GRID DE PLANES ACTUALIZADO A 4 COLUMNAS */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto items-start animate-fade-in-up">
             
             {/* PLAN GRATIS */}
-            <div className={`rounded-3xl p-8 border-2 flex flex-col h-full transition relative ${userData.role === 'STUDENT' ? 'bg-white border-green-500 shadow-xl' : 'bg-slate-100 border-slate-200 opacity-70'}`}>
+            <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'STUDENT' ? 'bg-white border-green-500 shadow-xl' : 'bg-slate-100 border-slate-200 opacity-70'}`}>
               {userData.role === 'STUDENT' && (
                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
               )}
@@ -229,28 +223,48 @@ const PlanesPage = () => {
             </div>
 
             {/* PLAN SOLO TEST */}
-            <div className={`rounded-3xl p-8 border-2 flex flex-col h-full transition relative ${userData.role === 'TEST' ? 'bg-white border-green-500 shadow-xl' : 'bg-white border-blue-100 hover:border-blue-400 shadow-lg'}`}>
+            <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'TEST' ? 'bg-white border-green-500 shadow-xl' : 'bg-white border-blue-100 hover:border-blue-400 shadow-lg'}`}>
                {userData.role === 'TEST' && (
                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
               )}
               <h3 className="text-xl font-bold text-blue-600 mb-2">Solo Test</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19€</span><span className="ml-1 text-slate-500">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> +30.000 Preguntas</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> +30k Preguntas</li>
                 <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Simulacros Ilimitados</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Ranking</li>
               </ul>
               {userData.role === 'TEST' ? (
                  <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
               ) : (
-                 <button onClick={() => handleUpgrade('Solo Test')} className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg shadow-blue-200">
+                 <button onClick={() => handleUpgrade('Solo Test')} className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg shadow-blue-200 text-sm">
                    Mejorar a Test
                  </button>
               )}
             </div>
 
+            {/* --- PLAN SOLO SUPUESTOS (NUEVO) --- */}
+            <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'PRACTICAL' ? 'bg-white border-green-500 shadow-xl' : 'bg-white border-indigo-100 hover:border-indigo-400 shadow-lg'}`}>
+               {userData.role === 'PRACTICAL' && (
+                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
+              )}
+              <h3 className="text-xl font-bold text-indigo-600 mb-2">Solo Supuestos</h3>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
+              <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> +500 Casos Prácticos</li>
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Resolución Guiada</li>
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Vídeos Explicativos</li>
+              </ul>
+              {userData.role === 'PRACTICAL' ? (
+                 <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
+              ) : (
+                 <button onClick={() => handleUpgrade('Solo Supuestos')} className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-200 text-sm">
+                   Mejorar a Supuestos
+                 </button>
+              )}
+            </div>
+
             {/* PLAN OPOSITOR COMPLETO */}
-            <div className={`rounded-3xl p-8 border-2 flex flex-col h-full transition relative ${userData.role === 'PREMIUM' ? 'bg-slate-900 border-green-500 shadow-xl' : 'bg-slate-900 border-yellow-500 shadow-2xl'}`}>
+            <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'PREMIUM' ? 'bg-slate-900 border-green-500 shadow-xl' : 'bg-slate-900 border-yellow-500 shadow-2xl'}`}>
                {userData.role === 'PREMIUM' ? (
                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
                ) : (
@@ -258,18 +272,17 @@ const PlanesPage = () => {
                )}
               
               <h3 className="text-xl font-bold text-yellow-400 mb-2">Opositor Completo</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49€</span><span className="ml-1 text-slate-400">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49€</span><span className="ml-1 text-slate-400 text-sm">/mes</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-300">
                 <li className="flex"><Crown className="h-4 w-4 text-yellow-500 mr-2"/> <strong>TODO INCLUIDO</strong></li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Temario PDF + Audio</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Clases en Vídeo</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Tutor Personal</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Temario + Tests</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Supuestos + Tutor</li>
               </ul>
               
               {userData.role === 'PREMIUM' ? (
                  <button disabled className="w-full py-3 rounded-xl bg-green-600 text-white font-bold">Tu Plan Actual</button>
               ) : (
-                 <button onClick={() => handleUpgrade('Opositor Completo')} className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20">
+                 <button onClick={() => handleUpgrade('Opositor Completo')} className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm">
                    Conseguir la Plaza
                  </button>
               )}
