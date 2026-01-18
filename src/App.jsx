@@ -14,6 +14,7 @@ import PracticalCasesPage from './pages/PracticalCasesPage';
 import ContactPage from './pages/ContactPage';
 import AdminMessagesPage from './pages/AdminMessagesPage';
 import PhysicalsPage from './pages/PhysicalsPage';
+import ProfilePage from './pages/ProfilePage'; // <--- IMPORTAR
 function App() {
   return (
     <Router>
@@ -31,6 +32,7 @@ function App() {
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/admin/mensajes" element={<AdminMessagesPage />} />
         <Route path="/fisicas" element={<PhysicalsPage />} />
+        <Route path="/perfil" element={<ProfilePage />} /> {/* <--- AÑADIR */}
       </Routes>
     </Router>
   );

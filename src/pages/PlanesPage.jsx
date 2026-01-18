@@ -14,8 +14,7 @@ const PlanesPage = () => {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    role: '',
-    displayRole: '',
+    role: '',     // Rol interno (TEST, PREMIUM, etc)
     expiration: ''
   });
 
@@ -29,16 +28,18 @@ const PlanesPage = () => {
     })
       .then(res => res.json())
       .then(data => {
+        // CORRECCIÓN: Mapear los códigos exactos que usa el Backend (SubscriptionController)
         let internalRole = 'STUDENT';
-        if (data.role === 'Solo Test') internalRole = 'TEST';
-        if (data.role === 'Solo Supuestos') internalRole = 'PRACTICAL';
-        if (data.role === 'Opositor Completo') internalRole = 'PREMIUM';
-        if (data.role === 'Administrador') internalRole = 'ADMIN';
+        
+        // El backend devuelve códigos como "TEST", "SUPUESTOS", "COMPLETO" o "ADMIN"
+        if (data.role === 'TEST') internalRole = 'TEST';
+        if (data.role === 'SUPUESTOS') internalRole = 'PRACTICAL';
+        if (data.role === 'COMPLETO' || data.role === 'PREMIUM') internalRole = 'PREMIUM';
+        if (data.role === 'ADMIN' || data.role === 'PROFESOR') internalRole = 'ADMIN';
 
         setUserData({
           name: data.name,
           email: data.email,
-          displayRole: data.role,
           role: internalRole,
           expiration: data.expiration
         });
@@ -46,9 +47,30 @@ const PlanesPage = () => {
       .catch(err => console.error(err));
   }, [navigate]);
 
-  // --- SIMULAR COMPRA ---
-  const handleUpgrade = (planName) => {
-    alert(`¡Genial! Has seleccionado el plan: ${planName}.\n\nAquí se abriría la pasarela de pago (Stripe/PayPal).`);
+  // --- COMPRAR / ACTUALIZAR ---
+  const handleUpgrade = async (planName) => {
+    if (!window.confirm(`¿Confirmar suscripción al plan ${planName}?`)) return;
+    
+    const token = localStorage.getItem('jwt_token');
+    try {
+        const res = await fetch(`${API_URL}/api/subscription/upgrade`, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plan: planName }) // Enviamos el nombre del plan
+        });
+
+        if (res.ok) {
+            alert("¡Plan actualizado con éxito! Disfruta de 30 días más.");
+            window.location.reload(); 
+        } else {
+            alert("Error al procesar el pago/actualización.");
+        }
+    } catch (err) {
+        console.error(err);
+    }
   };
 
   return (
@@ -97,7 +119,6 @@ const PlanesPage = () => {
               <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Preguntas ilimitadas</li>
               <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Actualizaciones mensuales</li>
               <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Simulacros Reales</li>
-
             </ul>
             {userData.role === 'TEST' ? (
               <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
@@ -130,8 +151,8 @@ const PlanesPage = () => {
           </div>
 
           {/* PLAN OPOSITOR COMPLETO */}
-          <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'PREMIUM' ? 'bg-slate-900 border-green-500 shadow-xl' : 'bg-slate-900 border-yellow-500 shadow-2xl'}`}>
-            {userData.role === 'PREMIUM' ? (
+          <div className={`rounded-3xl p-6 border-2 flex flex-col h-full transition relative ${userData.role === 'PREMIUM' || userData.role === 'ADMIN' ? 'bg-slate-900 border-green-500 shadow-xl' : 'bg-slate-900 border-yellow-500 shadow-2xl'}`}>
+            {userData.role === 'PREMIUM' || userData.role === 'ADMIN' ? (
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
             ) : (
               <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-yellow-500 text-slate-900 px-4 py-1 rounded-full text-xs font-bold uppercase">Recomendado</div>
@@ -145,7 +166,7 @@ const PlanesPage = () => {
               <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2" /> Tutor personalizado</li>
             </ul>
 
-            {userData.role === 'PREMIUM' ? (
+            {userData.role === 'PREMIUM' || userData.role === 'ADMIN' ? (
               <button disabled className="w-full py-3 rounded-xl bg-green-600 text-white font-bold">Tu Plan Actual</button>
             ) : (
               <button onClick={() => handleUpgrade('Opositor Completo')} className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm">
