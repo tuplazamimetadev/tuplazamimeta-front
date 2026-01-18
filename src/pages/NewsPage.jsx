@@ -15,7 +15,7 @@ const NewsPage = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
-    
+
     const [newsList, setNewsList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -30,7 +30,7 @@ const NewsPage = () => {
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration }))
             .catch(() => setUserData(prev => ({ ...prev, name: 'Alumno' })));
-        
+
         fetchNews();
     }, [navigate]);
 
@@ -118,25 +118,31 @@ const NewsPage = () => {
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
                         {canSeeTemario && (
                             <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <BookOpen className="h-4 w-4 mr-2"/> Temario
+                                <BookOpen className="h-4 w-4 mr-2" /> Temario
                             </button>
                         )}
-                        
+
                         {canSeeTests && (
                             <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                                <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                             </button>
                         )}
-                        
+
                         {canSeeSupuestos && (
                             <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                                <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                             </button>
                         )}
 
                         {/* ACTIVO */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
-                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
+                        </button>
+                        <button
+                            onClick={() => navigate('/contacto')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Mail className="h-4 w-4 mr-2" /> Contacto
                         </button>
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
@@ -176,9 +182,9 @@ const NewsPage = () => {
                             <Megaphone className="h-8 w-8 text-blue-600" /> Tablón de Anuncios
                         </h1>
                         <p className="text-slate-600 mt-2">Últimas novedades sobre la oposición en Castilla y León.</p>
-                        
+
                         {isAdmin && (
-                            <button 
+                            <button
                                 onClick={() => setShowForm(!showForm)}
                                 className="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl flex items-center gap-2 mx-auto transition shadow-lg shadow-blue-200"
                             >
@@ -193,20 +199,20 @@ const NewsPage = () => {
                                 <Send className="h-5 w-5 text-blue-500" /> Nueva Novedad
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <input 
+                                <input
                                     type="text" required placeholder="Título de la noticia"
                                     className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
+                                    value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })}
                                 />
-                                <textarea 
+                                <textarea
                                     required rows="4" placeholder="Contenido de la noticia..."
                                     className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
+                                    value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
-                                <input 
+                                <input
                                     type="url" placeholder="Enlace opcional (https://...)"
                                     className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})}
+                                    value={formData.link} onChange={e => setFormData({ ...formData, link: e.target.value })}
                                 />
                                 <button className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-black transition">
                                     Publicar en el Tablón
@@ -226,7 +232,7 @@ const NewsPage = () => {
                                         <div className="flex-1">
                                             <div className="flex items-center justify-between mb-4">
                                                 <span className="text-sm text-slate-400 flex items-center">
-                                                    <Calendar className="h-3 w-3 mr-1" /> 
+                                                    <Calendar className="h-3 w-3 mr-1" />
                                                     {new Date(news.publishedDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </span>
                                                 {isAdmin && (
@@ -244,7 +250,7 @@ const NewsPage = () => {
                                         </div>
                                         {news.link && (
                                             <div className="md:ml-6 flex items-center self-start md:self-center">
-                                                <a 
+                                                <a
                                                     href={news.link} target="_blank" rel="noopener noreferrer"
                                                     className="flex items-center text-blue-600 font-bold text-sm hover:underline bg-blue-50 px-4 py-2 rounded-lg"
                                                 >

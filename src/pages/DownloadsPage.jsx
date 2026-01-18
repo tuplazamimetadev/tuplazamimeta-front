@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2, Briefcase, Layers // <--- Iconos actualizados
+    Brain, Newspaper, Calendar, User, Trash2, Briefcase, Layers, Mail// <--- Iconos actualizados
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -20,13 +20,13 @@ const DownloadsPage = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    
+
     // Estado inicial de usuario
-    const [userData, setUserData] = useState({ 
-        name: 'Cargando...', 
-        email: '', 
-        role: 'Estudiante', 
-        expiration: null 
+    const [userData, setUserData] = useState({
+        name: 'Cargando...',
+        email: '',
+        role: 'Estudiante',
+        expiration: null
     });
 
     // --- LOGOUT ---
@@ -43,14 +43,14 @@ const DownloadsPage = () => {
 
         fetch(`${API_URL}/api/contents`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : [])
-            .then(data => { 
-                const filteredData = data.filter(topic => 
-                    !topic.title.toUpperCase().includes("TESTS GENERALES") && 
+            .then(data => {
+                const filteredData = data.filter(topic =>
+                    !topic.title.toUpperCase().includes("TESTS GENERALES") &&
                     !topic.title.toUpperCase().includes("SIMULACROS")
                 );
-                
-                setContents(filteredData); 
-                setLoading(false); 
+
+                setContents(filteredData);
+                setLoading(false);
             })
             .catch(() => setLoading(false));
     };
@@ -61,18 +61,18 @@ const DownloadsPage = () => {
         e.stopPropagation();
 
         if (!window.confirm("¿Estás seguro de que quieres eliminar este material?")) return;
-        
+
         const token = localStorage.getItem('jwt_token');
-        
+
         try {
             const res = await fetch(`${API_URL}/api/materials/${materialId}`, {
                 method: 'DELETE',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             if (res.ok) {
                 setContents(prevContents => {
                     return prevContents.map(topic => {
@@ -85,7 +85,7 @@ const DownloadsPage = () => {
                         return topic;
                     });
                 });
-                fetchContents(); 
+                fetchContents();
             } else {
                 alert("Error al eliminar");
             }
@@ -103,10 +103,10 @@ const DownloadsPage = () => {
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
-                setUserData({ 
-                    name: data.name, 
-                    email: data.email, 
-                    role: data.role || 'Estudiante', 
+                setUserData({
+                    name: data.name,
+                    email: data.email,
+                    role: data.role || 'Estudiante',
                     expiration: data.expiration
                 });
 
@@ -173,13 +173,12 @@ const DownloadsPage = () => {
                         {topic.materials && topic.materials.map((file) => (
                             <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
                                 <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                    <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
-                                        file.type === 'PDF' ? 'bg-red-50 text-red-600' : 
-                                        file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' : 
-                                        file.type === 'TEST' ? 'bg-green-50 text-green-600' : 
-                                        file.type === 'WORD' ? 'bg-blue-50 text-blue-600' : 
-                                        'bg-gray-100 text-gray-600'
-                                    }`}>
+                                    <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${file.type === 'PDF' ? 'bg-red-50 text-red-600' :
+                                        file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' :
+                                            file.type === 'TEST' ? 'bg-green-50 text-green-600' :
+                                                file.type === 'WORD' ? 'bg-blue-50 text-blue-600' :
+                                                    'bg-gray-100 text-gray-600'
+                                        }`}>
                                         {getIcon(file.type)}
                                     </div>
                                     <div className="min-w-0">
@@ -194,11 +193,11 @@ const DownloadsPage = () => {
                                     <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
                                         {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
                                     </a>
-                                    
+
                                     {canEdit && (
-                                        <button 
-                                            type="button" 
-                                            onClick={(e) => handleDeleteMaterial(e, file.id)} 
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteMaterial(e, file.id)}
                                             className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
                                             title="Eliminar material"
                                         >
@@ -232,27 +231,33 @@ const DownloadsPage = () => {
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
                         {/* Botón Activo (Temario) - Siempre visible aquí pues es la página actual */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
-                            <BookOpen className="h-4 w-4 mr-2"/> Temario
+                            <BookOpen className="h-4 w-4 mr-2" /> Temario
                         </button>
-                        
+
                         {canSeeTests && (
                             <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                                <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                             </button>
                         )}
 
                         {canSeeSupuestos && (
                             <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                                <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                             </button>
                         )}
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
                         </button>
-                        
+                        <button
+                            onClick={() => navigate('/contacto')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Mail className="h-4 w-4 mr-2" /> Contacto
+                        </button>
+
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
-                        
+
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
                             <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
                         </button>
@@ -261,8 +266,19 @@ const DownloadsPage = () => {
                     {/* User Area */}
                     <div className="hidden md:flex items-center space-x-4">
                         <div className="relative hidden lg:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
+                        {canEdit && (
+                            <button
+                                onClick={() => navigate('/admin/mensajes')}
+                                className="relative p-2 text-slate-400 hover:text-white transition group"
+                                title="Buzón Profesor"
+                            >
+                                <Mail className="h-6 w-6 group-hover:text-yellow-400 transition" />
+                                {/* Puntito rojo indicador (opcional) */}
+                                <span className="absolute top-1 right-1 h-2 w-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                            </button>
+                        )}
                         <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /><span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span></button>
-                        
+
                         <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
                             <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">
                                 {userData.name ? userData.name.charAt(0) : 'U'}
@@ -294,12 +310,12 @@ const DownloadsPage = () => {
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Estado:</span>
-                                        <span className="font-bold text-green-600 flex items-center"><CheckCircle className="w-3 h-3 mr-1"/> Activa</span>
+                                        <span className="font-bold text-green-600 flex items-center"><CheckCircle className="w-3 h-3 mr-1" /> Activa</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Válida hasta:</span>
                                         <span className="font-bold text-slate-800 flex items-center">
-                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {formatDate(userData.expiration)}
+                                            <Calendar className="w-3 h-3 mr-1 text-slate-400" /> {formatDate(userData.expiration)}
                                         </span>
                                     </div>
                                 </div>
@@ -321,17 +337,17 @@ const DownloadsPage = () => {
                     <p className="text-slate-600 mt-2">Todo el contenido de tu curso, actualizado al minuto.</p>
                 </div>
 
-                <UploadManager 
-                    userRole={userData.role} 
-                    topics={contents} 
-                    onUploadSuccess={fetchContents} 
+                <UploadManager
+                    userRole={userData.role}
+                    topics={contents}
+                    onUploadSuccess={fetchContents}
                 />
 
                 {loading && <div className="text-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto mb-4"></div><p className="text-slate-500">Cargando tu temario...</p></div>}
-                
+
                 {!loading && (
                     <div className="max-w-6xl mx-auto">
-                        
+
                         {/* SECCIÓN GRUPO A */}
                         {groupA.length > 0 && (
                             <div className="mb-12">

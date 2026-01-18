@@ -11,6 +11,8 @@ import PlanesPage from './pages/PlanesPage';
 import TestsPage from './pages/TestPage';
 import NewsPage from './pages/NewsPage'; 
 import PracticalCasesPage from './pages/PracticalCasesPage';
+import ContactPage from './pages/ContactPage';
+import AdminMessagesPage from './pages/AdminMessagesPage';
 function App() {
   return (
     <Router>
@@ -25,6 +27,8 @@ function App() {
         <Route path="/descargas" element={<DownloadsPage />} />
         <Route path="/noticias" element={<NewsPage />} /> {}
         <Route path="/supuestos" element={<PracticalCasesPage />} />
+        <Route path="/contacto" element={<ContactPage />} />
+        <Route path="/admin/mensajes" element={<AdminMessagesPage />} />
       </Routes>
     </Router>
   );

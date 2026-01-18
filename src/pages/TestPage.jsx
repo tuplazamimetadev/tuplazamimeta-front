@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Crown, LogOut,
-    Brain, Newspaper, Play, CheckCircle, Trash2, 
+    Brain, Newspaper, Play, CheckCircle, Trash2,
     Signal, AlertCircle, Briefcase // <--- 1. Importar icono
 } from 'lucide-react';
 
@@ -97,7 +97,7 @@ const TestsPage = () => {
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 setUserData(data);
-                
+
                 // --- REDIRECCIÓN DE SEGURIDAD ---
                 // Si el rol es SUPUESTOS, no entra aquí. PRUEBA entra pero no ve tests (lista vacía).
                 if (data.role === 'SUPUESTOS') {
@@ -110,7 +110,7 @@ const TestsPage = () => {
     }, [navigate]);
 
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-    
+
     // --- LÓGICA DE VISIBILIDAD DE BOTONES ---
     const canSeeTemario = userData.role !== 'SUPUESTOS';
     const canSeeSupuestos = userData.role !== 'TEST'; // TEST no ve supuestos
@@ -129,14 +129,14 @@ const TestsPage = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        
+
                         {/* 1. Botón Temario (Condicional) */}
                         {canSeeTemario && (
                             <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                                 <BookOpen className="h-4 w-4 mr-2" /> Temario
                             </button>
                         )}
-                        
+
                         {/* 2. Botón Tests (Activo - Siempre visible aquí) */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-sm">
                             <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
@@ -151,6 +151,12 @@ const TestsPage = () => {
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2" /> Noticias
+                        </button>
+                        <button
+                            onClick={() => navigate('/contacto')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Mail className="h-4 w-4 mr-2" /> Contacto
                         </button>
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
@@ -203,7 +209,7 @@ const TestsPage = () => {
                                 fixedType="TEST"
                                 fixedTopic={uploadTopic[0]}
 
-                                showDescription={true} 
+                                showDescription={true}
 
                                 onUploadSuccess={fetchContents}
                             />

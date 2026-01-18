@@ -15,12 +15,12 @@ const PracticalCasesPage = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
-    
+
     // Estados de Contenido
     const [casesList, setCasesList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
-    
+
     // Estado del Formulario
     const [formData, setFormData] = useState({ title: '', description: '' });
     const [selectedFile, setSelectedFile] = useState(null);
@@ -35,7 +35,7 @@ const PracticalCasesPage = () => {
             .then(res => res.json())
             .then(data => {
                 setUserData({ name: data.name, email: data.email, role: data.role, expiration: data.expiration });
-                
+
                 // --- REDIRECCIÓN DE SEGURIDAD ---
                 // Si el rol es TEST o PRUEBA, no tienen acceso a supuestos y se les expulsa
                 if (data.role === 'TEST' || data.role === 'PRUEBA') {
@@ -43,7 +43,7 @@ const PracticalCasesPage = () => {
                 }
             })
             .catch(() => navigate('/login'));
-        
+
         fetchCases();
     }, [navigate]);
 
@@ -72,7 +72,7 @@ const PracticalCasesPage = () => {
         const data = new FormData();
         data.append('title', formData.title);
         data.append('description', formData.description);
-        
+
         if (selectedFile) {
             data.append('file', selectedFile);
         } else {
@@ -125,7 +125,7 @@ const PracticalCasesPage = () => {
     };
 
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-    
+
     // --- LÓGICA DE VISIBILIDAD DE BOTONES ---
     // Visibilidad del Menú
     const canSeeTemario = userData.role !== 'SUPUESTOS';
@@ -146,28 +146,34 @@ const PracticalCasesPage = () => {
                     </div>
 
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        
+
                         {/* 1. Botón Temario (Condicional) */}
                         {canSeeTemario && (
                             <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <BookOpen className="h-4 w-4 mr-2"/> Temario
+                                <BookOpen className="h-4 w-4 mr-2" /> Temario
                             </button>
                         )}
-                        
+
                         {/* 2. Botón Tests (Condicional) */}
                         {canSeeTests && (
                             <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                                <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                             </button>
                         )}
-                        
-                         {/* Botón Activo (Supuestos) - Siempre visible aquí pues es la página actual */}
+
+                        {/* Botón Activo (Supuestos) - Siempre visible aquí pues es la página actual */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
-                            <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                            <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                         </button>
 
                         <button onClick={() => navigate('/noticias')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
+                        </button>
+                        <button
+                            onClick={() => navigate('/contacto')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Mail className="h-4 w-4 mr-2" /> Contacto
                         </button>
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
@@ -206,9 +212,9 @@ const PracticalCasesPage = () => {
                             <Briefcase className="h-8 w-8 text-indigo-600" /> Supuestos Prácticos
                         </h1>
                         <p className="text-slate-600 mt-2">Casos reales y profesionales para preparar la segunda prueba.</p>
-                        
+
                         {isAdmin && (
-                            <button 
+                            <button
                                 onClick={() => setShowForm(!showForm)}
                                 className="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl flex items-center gap-2 mx-auto transition shadow-lg shadow-indigo-200"
                             >
@@ -226,26 +232,26 @@ const PracticalCasesPage = () => {
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase">Título</label>
-                                    <input 
+                                    <input
                                         type="text" required placeholder="Ej: Intervención en vía pública"
                                         className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none mt-1"
-                                        value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})}
+                                        value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     />
                                 </div>
-                                
+
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase">Descripción</label>
-                                    <textarea 
+                                    <textarea
                                         required rows="4" placeholder="Planteamiento breve..."
                                         className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none mt-1"
-                                        value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})}
+                                        value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </div>
 
                                 {/* INPUT DE ARCHIVO */}
                                 <div className="border-2 border-dashed border-indigo-200 rounded-xl p-6 text-center hover:bg-indigo-50 transition cursor-pointer relative">
-                                    <input 
-                                        type="file" 
+                                    <input
+                                        type="file"
                                         required
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                         onChange={(e) => setSelectedFile(e.target.files[0])}
@@ -285,17 +291,17 @@ const PracticalCasesPage = () => {
                                             </button>
                                         )}
                                     </div>
-                                    
+
                                     <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-indigo-700 transition">
                                         {item.title}
                                     </h3>
-                                    
+
                                     <p className="text-slate-600 text-sm mb-6 flex-grow line-clamp-3">
                                         {item.description}
                                     </p>
 
                                     {/* Botón de Acción - SIEMPRE VISIBLE PARA QUIEN ESTÁ AQUÍ */}
-                                    <a 
+                                    <a
                                         href={item.url} target="_blank" rel="noopener noreferrer"
                                         className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
                                     >
