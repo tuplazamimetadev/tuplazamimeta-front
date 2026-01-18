@@ -3,20 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, Briefcase, Newspaper, Crown, LogOut,
-    Mail, MessageSquare, Send, CheckCircle, User, Calendar // Iconos necesarios
+    Mail, MessageSquare, Send, CheckCircle, User, Calendar,Activity // Iconos necesarios
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const ContactPage = () => {
     const navigate = useNavigate();
-    
+
     // --- ESTADOS ---
     const [activeTab, setActiveTab] = useState('general'); // 'general' o 'tutoria'
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: 'Estudiante', expiration: null });
-    
+
     // Estado Formulario
     const [formData, setFormData] = useState({ subject: '', message: '' });
     const [loading, setLoading] = useState(false);
@@ -26,7 +26,7 @@ const ContactPage = () => {
     useEffect(() => {
         const token = localStorage.getItem('jwt_token');
         if (!token) { navigate('/login'); return; }
-        
+
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.json())
             .then(data => setUserData(data))
@@ -78,9 +78,9 @@ const ContactPage = () => {
 
     // --- LOGICA VISUAL ---
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-    
+
     // Lógica Navbar (Igual que en DownloadsPage)
-    const canSeeTemario = userData.role !== 'SUPUESTOS'; 
+    const canSeeTemario = userData.role !== 'SUPUESTOS';
     const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
     const canSeeSupuestos = userData.role === 'ADMIN' || userData.role === 'COMPLETO' || userData.role === 'SUPUESTOS';
 
@@ -91,7 +91,7 @@ const ContactPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            
+
             {/* ==================================================================
                  NAVBAR (COPIA EXACTA DE DOWNLOADSPAGE PARA CONSISTENCIA)
             ================================================================== */}
@@ -107,36 +107,42 @@ const ContactPage = () => {
 
                     {/* Menú Central */}
                     <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        
+
                         {canSeeTemario && (
                             <button onClick={() => navigate('/descargas')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <BookOpen className="h-4 w-4 mr-2"/> Temario
+                                <BookOpen className="h-4 w-4 mr-2" /> Temario
                             </button>
                         )}
-                        
+
                         {canSeeTests && (
                             <button onClick={() => navigate('/tests')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
+                                <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
                             </button>
                         )}
 
                         {canSeeSupuestos && (
                             <button onClick={() => navigate('/supuestos')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Briefcase className="h-4 w-4 mr-2"/> Supuestos
+                                <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                             </button>
                         )}
+                        <button
+                            onClick={() => navigate('/fisicas')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Activity className="h-4 w-4 mr-2" /> Físicas
+                        </button>
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                            <Newspaper className="h-4 w-4 mr-2"/> Noticias
+                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
                         </button>
 
                         {/* BOTÓN CONTACTO (ACTIVO AQUÍ) */}
                         <button className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
-                            <Mail className="h-4 w-4 mr-2"/> Contacto
+                            <Mail className="h-4 w-4 mr-2" /> Contacto
                         </button>
-                        
+
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
-                        
+
                         <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
                             <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
                         </button>
@@ -145,11 +151,11 @@ const ContactPage = () => {
                     {/* User Area */}
                     <div className="hidden md:flex items-center space-x-4">
                         <div className="relative hidden lg:block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" /><input type="text" placeholder="Buscar..." className="bg-slate-800 rounded-full pl-10 pr-4 py-2 text-sm text-white w-32 focus:w-48 transition-all" /></div>
-                        
+
                         {/* BUZÓN DE ADMIN (Solo si es admin) */}
                         {canEdit && (
-                            <button 
-                                onClick={() => navigate('/admin/mensajes')} 
+                            <button
+                                onClick={() => navigate('/admin/mensajes')}
                                 className="relative p-2 text-slate-400 hover:text-white transition group"
                                 title="Buzón Profesor"
                             >
@@ -159,7 +165,7 @@ const ContactPage = () => {
                         )}
 
                         <button className="relative p-2 text-slate-400 hover:text-white"><Bell className="h-6 w-6" /><span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span></button>
-                        
+
                         <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
                             <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">
                                 {userData.name ? userData.name.charAt(0) : 'U'}
@@ -191,12 +197,12 @@ const ContactPage = () => {
                                 <div className="space-y-2">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Estado:</span>
-                                        <span className="font-bold text-green-600 flex items-center"><CheckCircle className="w-3 h-3 mr-1"/> Activa</span>
+                                        <span className="font-bold text-green-600 flex items-center"><CheckCircle className="w-3 h-3 mr-1" /> Activa</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Válida hasta:</span>
                                         <span className="font-bold text-slate-800 flex items-center">
-                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {formatDate(userData.expiration)}
+                                            <Calendar className="w-3 h-3 mr-1 text-slate-400" /> {formatDate(userData.expiration)}
                                         </span>
                                     </div>
                                 </div>
@@ -219,27 +225,27 @@ const ContactPage = () => {
                 </div>
 
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 flex flex-col md:flex-row animate-fade-in-up">
-                    
+
                     {/* SIDEBAR SELECCIÓN */}
                     <div className="md:w-1/3 bg-slate-50 p-6 border-r border-slate-100">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">¿Qué necesitas?</h3>
                         <div className="space-y-3">
-                            <button 
+                            <button
                                 onClick={() => { setActiveTab('general'); setSuccess(false); }}
                                 className={`w-full text-left p-4 rounded-xl flex items-center gap-3 transition ${activeTab === 'general' ? 'bg-white shadow-md text-blue-600 border border-blue-100' : 'text-slate-600 hover:bg-slate-100'}`}
                             >
-                                <div className={`p-2 rounded-lg ${activeTab === 'general' ? 'bg-blue-100' : 'bg-slate-200'}`}><Mail className="h-5 w-5"/></div>
+                                <div className={`p-2 rounded-lg ${activeTab === 'general' ? 'bg-blue-100' : 'bg-slate-200'}`}><Mail className="h-5 w-5" /></div>
                                 <div>
                                     <span className="font-bold block text-sm">Consulta General</span>
                                     <span className="text-xs opacity-70">Problemas, dudas web...</span>
                                 </div>
                             </button>
 
-                            <button 
+                            <button
                                 onClick={() => { setActiveTab('tutoria'); setSuccess(false); }}
                                 className={`w-full text-left p-4 rounded-xl flex items-center gap-3 transition ${activeTab === 'tutoria' ? 'bg-white shadow-md text-indigo-600 border border-indigo-100' : 'text-slate-600 hover:bg-slate-100'}`}
                             >
-                                <div className={`p-2 rounded-lg ${activeTab === 'tutoria' ? 'bg-indigo-100' : 'bg-slate-200'}`}><MessageSquare className="h-5 w-5"/></div>
+                                <div className={`p-2 rounded-lg ${activeTab === 'tutoria' ? 'bg-indigo-100' : 'bg-slate-200'}`}><MessageSquare className="h-5 w-5" /></div>
                                 <div>
                                     <span className="font-bold block text-sm">Pedir Tutoría</span>
                                     <span className="text-xs opacity-70">Dudas sobre temario</span>
@@ -266,8 +272,8 @@ const ContactPage = () => {
                                         {activeTab === 'general' ? 'Mandar un correo al profesor' : 'Solicitar una Tutoría Personal'}
                                     </h2>
                                     <p className="text-sm text-slate-500 mb-6">
-                                        {activeTab === 'general' 
-                                            ? 'Utiliza este formulario para cualquier consulta administrativa o técnica.' 
+                                        {activeTab === 'general'
+                                            ? 'Utiliza este formulario para cualquier consulta administrativa o técnica.'
                                             : 'Describe el tema y las dudas. El profesor te contactará para agendar fecha.'}
                                     </p>
                                 </div>
@@ -276,13 +282,13 @@ const ContactPage = () => {
                                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
                                         {activeTab === 'general' ? 'Asunto' : 'Tema a tratar'}
                                     </label>
-                                    <input 
-                                        type="text" 
-                                        required 
+                                    <input
+                                        type="text"
+                                        required
                                         placeholder={activeTab === 'general' ? 'Ej: Problema con el login' : 'Ej: Tema 4 - Poder Judicial'}
                                         className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
                                         value={formData.subject}
-                                        onChange={e => setFormData({...formData, subject: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, subject: e.target.value })}
                                     />
                                 </div>
 
@@ -290,22 +296,22 @@ const ContactPage = () => {
                                     <label className="text-xs font-bold text-slate-500 uppercase block mb-1">
                                         {activeTab === 'general' ? 'Mensaje' : 'Breve descripción de la duda'}
                                     </label>
-                                    <textarea 
-                                        required 
-                                        rows="5" 
+                                    <textarea
+                                        required
+                                        rows="5"
                                         placeholder={activeTab === 'general' ? 'Escribe tu mensaje aquí...' : 'Tengo dudas específicas sobre...'}
                                         className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
                                         value={formData.message}
-                                        onChange={e => setFormData({...formData, message: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, message: e.target.value })}
                                     />
                                 </div>
 
                                 <div className="pt-2">
-                                    <button 
+                                    <button
                                         disabled={loading}
                                         className={`w-full py-3 rounded-xl font-bold text-white shadow-lg transition flex items-center justify-center gap-2 ${activeTab === 'general' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200'}`}
                                     >
-                                        {loading ? 'Enviando...' : <><Send className="h-4 w-4"/> Enviar Solicitud</>}
+                                        {loading ? 'Enviando...' : <><Send className="h-4 w-4" /> Enviar Solicitud</>}
                                     </button>
                                 </div>
                             </form>

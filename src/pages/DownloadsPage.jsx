@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, CheckCircle, Video, FileText, Settings, CreditCard, Crown,
     Link as LinkIcon, File, Play, Download, Lock, LogOut,
-    Brain, Newspaper, Calendar, User, Trash2, Briefcase, Layers, Mail// <--- Iconos actualizados
+    Brain, Newspaper, Calendar, User, Trash2, Briefcase, Layers, Mail, Activity// <--- Iconos actualizados
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
@@ -245,6 +245,12 @@ const DownloadsPage = () => {
                                 <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                             </button>
                         )}
+                        <button
+                            onClick={() => navigate('/fisicas')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Activity className="h-4 w-4 mr-2" /> Físicas
+                        </button>
 
                         <button onClick={() => navigate('/noticias')} className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
                             <Newspaper className="h-4 w-4 mr-2" /> Noticias

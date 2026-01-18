@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, LogOut, Crown,
-    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase,Mail
+    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase, Mail, Activity
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -133,6 +133,12 @@ const NewsPage = () => {
                                 <Briefcase className="h-4 w-4 mr-2" /> Supuestos
                             </button>
                         )}
+                        <button
+                            onClick={() => navigate('/fisicas')}
+                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
+                        >
+                            <Activity className="h-4 w-4 mr-2" /> Físicas
+                        </button>
 
                         {/* ACTIVO */}
                         <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
