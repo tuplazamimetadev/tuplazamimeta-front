@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Crown, LogOut,
     Brain, Newspaper, Play, CheckCircle, Trash2,
-    Signal, AlertCircle, Briefcase // <--- 1. Importar icono
+    Signal, AlertCircle, Briefcase, Mail// <--- 1. Importar icono
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';

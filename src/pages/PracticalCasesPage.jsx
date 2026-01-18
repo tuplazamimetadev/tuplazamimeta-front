@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, Crown, LogOut,
-    Briefcase, FileText, CheckCircle, PlusCircle, Trash2, Send, ExternalLink, PlayCircle, Newspaper, UploadCloud
+    Briefcase, FileText, CheckCircle, PlusCircle, Trash2, Send, ExternalLink, PlayCircle, Newspaper, UploadCloud, Mail
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';

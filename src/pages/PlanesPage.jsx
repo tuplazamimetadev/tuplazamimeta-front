@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield, Menu, X, CheckCircle, Crown, CreditCard, ArrowLeft,
-  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, Briefcase, FileText
+  Bell, Search, BookOpen, Brain, Settings, LogOut, Newspaper, Briefcase, FileText, Mail
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
