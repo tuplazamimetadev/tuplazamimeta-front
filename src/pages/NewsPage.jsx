@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import {
-    Shield, Menu, X, Bell, Search,
-    BookOpen, Brain, LogOut, Crown,
-    Newspaper, Calendar, Megaphone, ArrowRight, PlusCircle, Trash2, Send, ExternalLink, Briefcase, Mail, Activity
+    Calendar, Megaphone, PlusCircle, Trash2, Send, ExternalLink
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -12,8 +11,6 @@ const NewsPage = () => {
     const navigate = useNavigate();
 
     // --- ESTADOS ---
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: '', expiration: '' });
 
     const [newsList, setNewsList] = useState([]);
@@ -87,100 +84,12 @@ const NewsPage = () => {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('user_name');
-        navigate('/login');
-    };
-
     const isAdmin = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-
-    // --- LÓGICA DE VISIBILIDAD NAVBAR ---
-    // SUPUESTOS: No ve Temario ni Tests
-    const canSeeTemario = userData.role !== 'SUPUESTOS';
-    const canSeeTests = userData.role !== 'SUPUESTOS';
-    // TEST: No ve Supuestos
-    const canSeeSupuestos = userData.role !== 'TEST';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            {/* NAVBAR */}
-            <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <Shield className="h-8 w-8 text-yellow-500" />
-                        <div className="flex flex-col">
-                            <span className="text-lg font-bold tracking-wider uppercase leading-none">AULA VIRTUAL</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Tu Plaza Mi Meta</span>
-                        </div>
-                    </div>
+            <Navbar user={userData} activePage="noticias" />
 
-                    <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        {canSeeTemario && (
-                            <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <BookOpen className="h-4 w-4 mr-2" /> Temario
-                            </button>
-                        )}
-
-                        {canSeeTests && (
-                            <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2" /> Ponte a prueba
-                            </button>
-                        )}
-
-                        {canSeeSupuestos && (
-                            <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Briefcase className="h-4 w-4 mr-2" /> Supuestos
-                            </button>
-                        )}
-                        <button
-                            onClick={() => navigate('/fisicas')}
-                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
-                        >
-                            <Activity className="h-4 w-4 mr-2" /> Físicas
-                        </button>
-
-                        {/* ACTIVO */}
-                        <button className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center bg-slate-700 text-white shadow-sm">
-                            <Newspaper className="h-4 w-4 mr-2" /> Noticias
-                        </button>
-                        <button
-                            onClick={() => navigate('/contacto')}
-                            className="px-6 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white"
-                        >
-                            <Mail className="h-4 w-4 mr-2" /> Contacto
-                        </button>
-                        <div className="w-px h-6 bg-slate-700 mx-2"></div>
-                        <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center">
-                            <Crown className="h-3 w-3 mr-1.5" /> Mi Plan
-                        </button>
-                    </div>
-
-                    <div className="hidden md:flex items-center space-x-4">
-                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
-                            <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">{userData.name ? userData.name.charAt(0) : 'U'}</div>
-                            <span className="text-sm font-medium max-w-[100px] truncate">{userData.name}</span>
-                        </button>
-                    </div>
-                    <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
-                </div>
-            </nav>
-
-            {/* MODAL PERFIL */}
-            {isProfileOpen && (
-                <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
-                    <div className="absolute top-20 right-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6" onClick={e => e.stopPropagation()}>
-                        <div className="text-center mb-6">
-                            <div className="h-16 w-16 bg-slate-900 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">{userData.name?.charAt(0)}</div>
-                            <h3 className="font-bold">{userData.name}</h3>
-                            <p className="text-xs text-slate-500">{userData.email}</p>
-                        </div>
-                        <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2 rounded-lg font-bold text-sm hover:bg-red-100">Cerrar Sesión</button>
-                    </div>
-                </div>
-            )}
-
-            {/* CONTENIDO PRINCIPAL */}
             <div className="container mx-auto px-6 py-12">
                 <div className="animate-fade-in-up max-w-5xl mx-auto">
                     <div className="mb-10 text-center">

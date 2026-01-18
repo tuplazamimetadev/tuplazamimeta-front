@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import {
-    Shield, Menu, X, Bell, Search,
-    BookOpen, Brain, Briefcase, Newspaper, Crown, Mail,
     Activity, Timer, Dumbbell, Waves, Footprints, CheckCircle, AlertTriangle, FileText,
-    ChevronDown, ChevronUp, Flame, Calendar,User
+    ChevronDown, ChevronUp, Flame, Calendar, User
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -13,8 +12,6 @@ const PhysicalsPage = () => {
     const navigate = useNavigate();
     
     // --- ESTADOS ---
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [userData, setUserData] = useState({ name: 'Cargando...', email: '', role: 'Estudiante', expiration: null });
     
     // Estado para controlar qué plan de entrenamiento está desplegado
@@ -31,12 +28,6 @@ const PhysicalsPage = () => {
             .catch(() => navigate('/login'));
     }, [navigate]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('jwt_token');
-        localStorage.removeItem('user_name');
-        navigate('/login');
-    };
-
     const togglePlan = (id) => {
         if (expandedPlanId === id) {
             setExpandedPlanId(null);
@@ -45,19 +36,19 @@ const PhysicalsPage = () => {
         }
     };
 
-    // --- DATOS EXTENDIDOS DE LAS PRUEBAS (Basado en el PDF y Fisiología del Deporte) ---
+    // --- DATOS EXTENDIDOS DE LAS PRUEBAS ---
     const testsData = [
         {
             id: 1,
             title: "Salto de Longitud",
             icon: <Footprints className="h-8 w-8 text-orange-500" />,
             desc: "Potencia tren inferior. Pies juntos.",
-            marks: { men: "2,30 m.", women: "1,90 m." }, // [cite: 301]
+            marks: { men: "2,30 m.", women: "1,90 m." },
             rules: [
-                "Salida tras línea de 1m x 0,05m[cite: 315].",
-                "Pies juntos, sin carrera previa[cite: 294, 316].",
-                "Se permite balanceo de talones y elevación antes del salto[cite: 317].",
-                "Se mide hasta la huella más cercana a la línea de salida[cite: 318]."
+                "Salida tras línea de 1m x 0,05m.",
+                "Pies juntos, sin carrera previa.",
+                "Se permite balanceo de talones y elevación antes del salto.",
+                "Se mide hasta la huella más cercana a la línea de salida."
             ],
             training: {
                 focus: "Fuerza Explosiva y Técnica de Vuelo",
@@ -95,12 +86,12 @@ const PhysicalsPage = () => {
             title: "Balón Medicinal",
             icon: <Dumbbell className="h-8 w-8 text-purple-600" />,
             desc: "Potencia tren superior. Lanzamiento dorsal.",
-            marks: { men: "6,25 m. (5 Kg)", women: "6,25 m. (3 Kg)" }, // [cite: 301, 335]
+            marks: { men: "6,25 m. (5 Kg)", women: "6,25 m. (3 Kg)" },
             rules: [
-                "Balón de 5 Kg (Hombres) / 3 Kg (Mujeres)[cite: 335].",
-                "Lanzamiento con dos manos desde detrás de la cabeza[cite: 337].",
-                "No se puede despegar totalmente los pies del suelo (saltar)[cite: 342].",
-                "Se permite balanceo de cuerpo y brazos[cite: 338]."
+                "Balón de 5 Kg (Hombres) / 3 Kg (Mujeres).",
+                "Lanzamiento con dos manos desde detrás de la cabeza.",
+                "No se puede despegar totalmente los pies del suelo (saltar).",
+                "Se permite balanceo de cuerpo y brazos."
             ],
             training: {
                 focus: "Cadena Posterior, Tríceps y Core",
@@ -138,11 +129,11 @@ const PhysicalsPage = () => {
             title: "Velocidad (60 metros)",
             icon: <Timer className="h-8 w-8 text-red-500" />,
             desc: "Pura potencia anaeróbica aláctica.",
-            marks: { men: "8\"6", women: "10\"4" }, // [cite: 301, 360]
+            marks: { men: "8\"6", women: "10\"4" },
             rules: [
-                "Salida de pie o agachado, sin tacos[cite: 347].",
-                "Solo se permite 1 salida nula por corredor. A la segunda, eliminado[cite: 351, 352].",
-                "Medición manual con cronómetro[cite: 349]."
+                "Salida de pie o agachado, sin tacos.",
+                "Solo se permite 1 salida nula por corredor. A la segunda, eliminado.",
+                "Medición manual con cronómetro."
             ],
             training: {
                 focus: "Reacción, Aceleración y Velocidad Punta",
@@ -180,11 +171,11 @@ const PhysicalsPage = () => {
             title: "Resistencia (1000 metros)",
             icon: <Activity className="h-8 w-8 text-green-600" />,
             desc: "Resistencia mixta (Aeróbica/Anaeróbica).",
-            marks: { men: "3'30\"", women: "4'25\"" }, // [cite: 301, 370]
+            marks: { men: "3'30\"", women: "4'25\"" },
             rules: [
-                "Salida de pie o agachado[cite: 363].",
-                "Un solo intento[cite: 366].",
-                "Segunda salida nula elimina al aspirante[cite: 367]."
+                "Salida de pie o agachado.",
+                "Un solo intento.",
+                "Segunda salida nula elimina al aspirante."
             ],
             training: {
                 focus: "VO2 Max y Tolerancia al Lactato",
@@ -222,12 +213,12 @@ const PhysicalsPage = () => {
             title: "Natación (25 metros)",
             icon: <Waves className="h-8 w-8 text-blue-500" />,
             desc: "Velocidad en medio acuático.",
-            marks: { men: "21\"", women: "24\"" }, // [cite: 301, 387]
+            marks: { men: "21\"", women: "24\"" },
             rules: [
-                "Estilo libre[cite: 298, 374].",
-                "Salida desde poyete (borde) o desde dentro del agua[cite: 373].",
-                "Dos salidas nulas eliminan[cite: 377].",
-                "Prohibido apoyarse en corcheras o tocar el fondo[cite: 377]."
+                "Estilo libre.",
+                "Salida desde poyete (borde) o desde dentro del agua.",
+                "Dos salidas nulas eliminan.",
+                "Prohibido apoyarse en corcheras o tocar el fondo."
             ],
             training: {
                 focus: "Técnica, Salida y Batido de Piernas",
@@ -262,65 +253,10 @@ const PhysicalsPage = () => {
         }
     ];
 
-    const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
-    const canSeeTemario = userData.role !== 'SUPUESTOS'; 
-    const canSeeTests = userData.role !== 'SUPUESTOS' && userData.role !== 'PRUEBA';
-    const canSeeSupuestos = userData.role === 'ADMIN' || userData.role === 'COMPLETO' || userData.role === 'SUPUESTOS';
-
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            
-            {/* NAVBAR */}
-            <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <Shield className="h-8 w-8 text-yellow-500" />
-                        <div className="flex flex-col">
-                            <span className="text-lg font-bold tracking-wider uppercase leading-none">AULA VIRTUAL</span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Tuplazamimeta</span>
-                        </div>
-                    </div>
+            <Navbar user={userData} activePage="fisicas" />
 
-                    <div className="hidden md:flex space-x-1 items-center bg-slate-800/50 p-1 rounded-lg border border-slate-700">
-                        {canSeeTemario && <button onClick={() => navigate('/descargas')} className="px-4 py-2 rounded-md font-bold text-sm text-slate-400 hover:text-white transition"><BookOpen className="h-4 w-4 mr-2"/> Temario</button>}
-                        {canSeeTests && <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm text-slate-400 hover:text-white transition"><Brain className="h-4 w-4 mr-2"/> Tests</button>}
-                        {canSeeSupuestos && <button onClick={() => navigate('/supuestos')} className="px-4 py-2 rounded-md font-bold text-sm text-slate-400 hover:text-white transition"><Briefcase className="h-4 w-4 mr-2"/> Supuestos</button>}
-                        <button onClick={() => navigate('/noticias')} className="px-4 py-2 rounded-md font-bold text-sm text-slate-400 hover:text-white transition"><Newspaper className="h-4 w-4 mr-2"/> Noticias</button>
-                        <button onClick={() => navigate('/contacto')} className="px-4 py-2 rounded-md font-bold text-sm text-slate-400 hover:text-white transition"><Mail className="h-4 w-4 mr-2"/> Contacto</button>
-                        
-                        {/* ACTIVO */}
-                        <button className="px-4 py-2 rounded-md font-bold text-sm bg-slate-700 text-white shadow-sm flex items-center transition">
-                            <Activity className="h-4 w-4 mr-2"/> Físicas
-                        </button>
-
-                        <div className="w-px h-6 bg-slate-700 mx-2"></div>
-                        <button onClick={() => navigate('/suscripcion')} className="px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center"><Crown className="h-3 w-3 mr-1.5" /> Mi Plan</button>
-                    </div>
-
-                    <div className="hidden md:flex items-center space-x-4">
-                        <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full pl-2 pr-4 py-1 transition">
-                            <div className="h-8 w-8 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg uppercase">{userData.name ? userData.name.charAt(0) : 'U'}</div>
-                        </button>
-                    </div>
-                    <div className="md:hidden"><button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X /> : <Menu />}</button></div>
-                </div>
-            </nav>
-
-            {/* PERFIL MODAL */}
-            {isProfileOpen && (
-                <div className="fixed inset-0 z-[60]" onClick={() => setIsProfileOpen(false)}>
-                    <div className="absolute top-20 right-4 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-6" onClick={e => e.stopPropagation()}>
-                        <div className="text-center mb-6">
-                            <div className="h-16 w-16 bg-slate-900 rounded-full mx-auto flex items-center justify-center text-white text-2xl font-bold mb-2">{userData.name?.charAt(0)}</div>
-                            <h3 className="font-bold">{userData.name}</h3>
-                            <p className="text-xs text-slate-500">{userData.email}</p>
-                        </div>
-                        <button onClick={handleLogout} className="w-full bg-red-50 text-red-500 py-2 rounded-lg font-bold text-sm hover:bg-red-100">Cerrar Sesión</button>
-                    </div>
-                </div>
-            )}
-
-            {/* CONTENIDO PRINCIPAL */}
             <div className="container mx-auto px-6 py-12 max-w-7xl">
                 
                 <div className="text-center mb-12 animate-fade-in-up">
@@ -334,20 +270,18 @@ const PhysicalsPage = () => {
                     </p>
                 </div>
 
-                {/* AVISO CERTIFICADO */}
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-xl shadow-sm mb-12 animate-fade-in-up">
                     <div className="flex items-start">
                         <AlertTriangle className="h-6 w-6 text-yellow-600 mr-4 mt-1 flex-shrink-0" />
                         <div>
-                            <h3 className="font-bold text-yellow-800 text-lg mb-1">Obligatorio: Certificado Médico [cite: 49]</h3>
+                            <h3 className="font-bold text-yellow-800 text-lg mb-1">Obligatorio: Certificado Médico</h3>
                             <p className="text-yellow-700 text-sm leading-relaxed">
-                                Debes presentar un certificado médico oficial extendido en impreso original y firmado por colegiado en ejercicio. Debe indicar expresamente que reúnes las <strong>"condiciones físicas y sanitarias necesarias"</strong> para realizar las pruebas de la Base 15. Sin esto, serás excluido [cite: 291-292].
+                                Debes presentar un certificado médico oficial extendido en impreso original y firmado por colegiado en ejercicio. Debe indicar expresamente que reúnes las <strong>"condiciones físicas y sanitarias necesarias"</strong> para realizar las pruebas de la Base 15. Sin esto, serás excluido.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                {/* LISTA DE PRUEBAS */}
                 <div className="space-y-8">
                     {testsData.map((test) => (
                         <div key={test.id} className="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transition duration-300">
@@ -366,7 +300,7 @@ const PhysicalsPage = () => {
                                         <p className="text-sm text-slate-500 font-medium uppercase tracking-wide mb-6">{test.desc}</p>
                                         
                                         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Marcas Mínimas [cite: 301]</h4>
+                                            <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Marcas Mínimas</h4>
                                             <div className="flex justify-between items-center text-sm">
                                                 <span className="flex items-center font-bold text-blue-900"><User className="h-3 w-3 mr-2 text-blue-500"/> Hombres</span>
                                                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono font-bold">{test.marks.men}</span>
