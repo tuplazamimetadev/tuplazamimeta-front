@@ -237,7 +237,7 @@ const PlanesPage = () => {
               <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">0€</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
                 <li className="flex"><CheckCircle className="h-4 w-4 text-green-500 mr-2"/> Acceso Limitado</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-green-500 mr-2"/> 1 Simulacro</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-green-500 mr-2"/> 1 Tema de ejemplo</li>
               </ul>
               <button disabled={userData.role === 'STUDENT'} className="w-full py-3 rounded-xl border border-slate-300 font-bold text-slate-400 cursor-not-allowed">
                 {userData.role === 'STUDENT' ? 'Tu Plan Actual' : 'Plan Básico'}
@@ -250,10 +250,12 @@ const PlanesPage = () => {
                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
               )}
               <h3 className="text-xl font-bold text-blue-600 mb-2">Solo Test</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19,99€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> +30k Preguntas</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Simulacros Ilimitados</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Preguntas ilimitadas</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Actualizaciones mensuales</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2"/> Simulacros Reales</li>
+
               </ul>
               {userData.role === 'TEST' ? (
                  <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
@@ -270,11 +272,11 @@ const PlanesPage = () => {
                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase">Plan Actual</div>
               )}
               <h3 className="text-xl font-bold text-indigo-600 mb-2">Solo Supuestos</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25,99€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> +500 Casos Prácticos</li>
-                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Resolución Guiada</li>
-                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Vídeos Explicativos</li>
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Casos Prácticos profesionales</li>
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Actualización mensual</li>
+                <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2"/> Resolución de dudas</li>
               </ul>
               {userData.role === 'PRACTICAL' ? (
                  <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
@@ -294,11 +296,11 @@ const PlanesPage = () => {
                )}
               
               <h3 className="text-xl font-bold text-yellow-400 mb-2">Opositor Completo</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49€</span><span className="ml-1 text-slate-400 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49,99€</span><span className="ml-1 text-slate-400 text-sm">/mes</span></div>
               <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-300">
                 <li className="flex"><Crown className="h-4 w-4 text-yellow-500 mr-2"/> <strong>TODO INCLUIDO</strong></li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Temario + Tests</li>
-                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Supuestos + Tutor</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Temario + Tests + Supuestos</li>
+                <li className="flex"><CheckCircle className="h-4 w-4 text-yellow-500 mr-2"/> Tutor personalizado</li>
               </ul>
               
               {userData.role === 'PREMIUM' ? (

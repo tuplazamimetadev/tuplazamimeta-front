@@ -108,8 +108,8 @@ const TarifasPage = () => {
               </p>
               
               <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">1 Simulacro real</span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Extracto Temario</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">1 Tema completo</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Prueba sin compromiso</span></li>
               </ul>
               
               <button onClick={() => navigate('/registro')} className="w-full py-3 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition text-sm">
@@ -123,15 +123,15 @@ const TarifasPage = () => {
                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Práctica</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Solo Test</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19€</span><span className="text-slate-500 ml-1 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">19,99€</span><span className="text-slate-500 ml-1 text-sm">/mes</span></div>
               <p className="text-slate-500 mb-6 text-sm leading-relaxed">
                 Para machacar preguntas tipo test sin parar.
               </p>
               
               <ul className="space-y-4 mb-8 flex-1">
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>+30k Preguntas</strong></span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Simulacros ilimitados</span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Batalla de Test</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>Preguntas ilimitadas</strong></span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Actualización mensual</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Simulacros reales</span></li>
               </ul>
               
               <button onClick={() => navigate('/registro')} className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg text-sm">
@@ -146,16 +146,16 @@ const TarifasPage = () => {
                 <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Casos</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">Solo Supuestos</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25€</span><span className="text-slate-500 ml-1 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25,99€</span><span className="text-slate-500 ml-1 text-sm">/mes</span></div>
               <p className="text-slate-500 mb-6 text-sm leading-relaxed">
                 Domina la parte práctica con casos reales y guiados.
               </p>
               
               <ul className="space-y-4 mb-8 flex-1 relative z-10">
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>+500 Supuestos</strong></span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Resolución paso a paso</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>Supuestos profesionales</strong></span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Renovación mensual</span></li>
                 <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Normativa aplicada</span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Vídeos explicativos</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-indigo-600 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Resolución de dudas</span></li>
               </ul>
               
               <button onClick={() => navigate('/registro')} className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg text-sm">
@@ -173,16 +173,16 @@ const TarifasPage = () => {
                 <span className="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide border border-yellow-500/30">Todo Incluido</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Opositor Completo</h3>
-              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49€</span><span className="text-slate-400 ml-1 text-sm">/mes</span></div>
+              <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-white">49,99€</span><span className="text-slate-400 ml-1 text-sm">/mes</span></div>
               <p className="text-slate-300 mb-6 text-sm leading-relaxed">
                 La preparación definitiva para conseguir tu plaza.
               </p>
               
               <ul className="space-y-4 mb-8 flex-1 text-slate-200">
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm font-bold text-white">Tests + Supuestos</span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>Temario Audio+PDF</strong></span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Clases y Tutor</span></li>
-                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Entrevista Personal</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm font-bold text-white">Temario +Tests + Supuestos</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm"><strong>Clases en vídeo</strong></span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Tutor personalizado</span></li>
+                <li className="flex items-start"><CheckCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5 shrink-0"/> <span className="text-sm">Infinidad de material complementario</span></li>
               </ul>
               
               <button onClick={() => navigate('/registro')} className="w-full py-4 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm">
@@ -202,7 +202,7 @@ const TarifasPage = () => {
             <div className="space-y-6">
                 <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition">
                     <h4 className="font-bold text-lg mb-2 text-slate-800">¿Qué incluye el plan de Supuestos?</h4>
-                    <p className="text-slate-600">Incluye acceso exclusivo a la base de datos de casos prácticos, vídeos de resolución y normativa, pero NO incluye el banco de preguntas tipo test ni el temario teórico.</p>
+                    <p className="text-slate-600">Incluye acceso exclusivo a la base de datos de casos prácticos, y resolución de dudas de los mismos, pero NO incluye el banco de preguntas tipo test ni el temario teórico.</p>
                 </div>
                 <div className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 transition">
                     <h4 className="font-bold text-lg mb-2 text-slate-800">¿Tengo permanencia?</h4>

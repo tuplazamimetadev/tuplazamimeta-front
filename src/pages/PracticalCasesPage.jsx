@@ -157,7 +157,7 @@ const PracticalCasesPage = () => {
                         {/* 2. Botón Tests (Condicional) */}
                         {canSeeTests && (
                             <button onClick={() => navigate('/tests')} className="px-4 py-2 rounded-md font-bold text-sm transition flex items-center text-slate-400 hover:text-white">
-                                <Brain className="h-4 w-4 mr-2"/> Tests
+                                <Brain className="h-4 w-4 mr-2"/> Ponte a prueba
                             </button>
                         )}
                         
@@ -205,7 +205,7 @@ const PracticalCasesPage = () => {
                         <h1 className="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">
                             <Briefcase className="h-8 w-8 text-indigo-600" /> Supuestos Prácticos
                         </h1>
-                        <p className="text-slate-600 mt-2">Casos reales y guiados para preparar la segunda prueba.</p>
+                        <p className="text-slate-600 mt-2">Casos reales y profesionales para preparar la segunda prueba.</p>
                         
                         {isAdmin && (
                             <button 

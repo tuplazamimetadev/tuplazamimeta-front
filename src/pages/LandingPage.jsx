@@ -158,11 +158,11 @@ const LandingPage = () => {
       {/* LOGOS */}
       <section className="bg-slate-50 py-10 border-y border-gray-200">
         <div className="container mx-auto text-center px-6">
-          <p className="text-slate-400 mb-6 font-semibold tracking-widest text-sm uppercase">Tecnología validada por opositores de</p>
+          <p className="text-slate-400 mb-6 font-semibold tracking-widest text-sm uppercase">Tecnología validada por opositores </p>
           <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition duration-500">
-             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700"><Star className="h-6 w-6 text-yellow-500 fill-current"/> Trustpilot</div>
-             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700"><Users className="h-6 w-6 text-blue-500 fill-current"/> +15.000 Alumnos</div>
-             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700">Google Reviews</div>
+             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700"><Star className="h-6 w-6 text-yellow-500 fill-current"/> +10 Años de experiencia</div>
+             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700"><Users className="h-6 w-6 text-blue-500 fill-current"/> Profesores policías</div>
+             <div className="flex items-center space-x-2 font-bold text-xl text-slate-700">Material hecho por profesionales</div>
           </div>
         </div>
       </section>
@@ -181,13 +181,13 @@ const LandingPage = () => {
           </div>
            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition duration-300 border border-slate-100">
             <div className="bg-yellow-50 w-16 h-16 rounded-2xl flex items-center justify-center text-yellow-600 mb-6"><CheckCircle className="h-8 w-8" /></div>
-            <h3 className="text-2xl font-bold mb-3 text-slate-900">Algoritmo de Test</h3>
-            <p className="text-slate-600">Nuestra IA detecta tus fallos y genera tests personalizados.</p>
+            <h3 className="text-2xl font-bold mb-3 text-slate-900">Test actualizados constantemente</h3>
+            <p className="text-slate-600">Para que prepares tu oposición a conciencia y no repitas tests.</p>
           </div>
            <div className="bg-white p-8 rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition duration-300 border border-slate-100">
             <div className="bg-indigo-50 w-16 h-16 rounded-2xl flex items-center justify-center text-indigo-600 mb-6"><Video className="h-8 w-8" /></div>
             <h3 className="text-2xl font-bold mb-3 text-slate-900">Aula Virtual 4K</h3>
-            <p className="text-slate-600">Clases grabadas y directos semanales con inspectores.</p>
+            <p className="text-slate-600">Clases grabadas y resolución de dudas con inspectores.</p>
           </div>
         </div>
       </section>
@@ -229,9 +229,9 @@ const LandingPage = () => {
               <div className="w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500 transition-colors">
                 <CheckCircle className="h-8 w-8 text-yellow-400 group-hover:text-slate-900" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Entrenamiento de Test</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Entrenamiento de pruebas físicas</h3>
               <p className="text-slate-400 leading-relaxed">
-                Generador de exámenes ilimitado. Simulacros reales con control de tiempo y ranking de alumnos. Analizamos tus estadísticas para decirte dónde mejorar.
+                Consejos y métodos de entrenamiento para tus pruebas físicas.
               </p>
             </div>
 
@@ -240,9 +240,9 @@ const LandingPage = () => {
               <div className="w-14 h-14 bg-slate-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-green-500 transition-colors">
                 <Shield className="h-8 w-8 text-green-400 group-hover:text-white" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Ortografía y Psicotécnicos</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Supuestos prácticos</h3>
               <p className="text-slate-400 leading-relaxed">
-                Preparación específica para las pruebas de corte. Cursos intensivos de ortografía y batería de psicotécnicos con explicaciones detalladas de resolución.
+                Preparación específica para las pruebas de supuestos prácticos. Creados por profesionales de la enseñanza policial y actualizados mensualmente.
               </p>
             </div>
 
@@ -263,7 +263,7 @@ const LandingPage = () => {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center space-x-2 text-slate-900 mb-4">
               <Shield className="h-6 w-6 text-yellow-500" />
-              <span className="text-lg font-bold">TU PLAZA MI META</span>
+              <span className="text-lg font-bold">TU PLAZAMIMETA</span>
             </div>
             <p className="mb-4">Formando a los futuros guardianes de la seguridad ciudadana con tecnología y pasión.</p>
           </div>
@@ -283,8 +283,7 @@ const LandingPage = () => {
           </div>
           <div>
             <h4 className="text-slate-900 font-bold mb-4 uppercase text-xs tracking-wider">Contacto</h4>
-            <p>C/ Gran Vía 12, Madrid</p>
-            <p className="text-blue-600 font-bold">info@tuplazamimeta.com</p>
+            <p className="text-blue-600 font-bold">tuplazamimeta@gmail.com</p>
           </div>
         </div>
         <div className="container mx-auto px-6 mt-12 pt-8 border-t border-gray-100 text-center text-xs">
