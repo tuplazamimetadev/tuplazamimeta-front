@@ -4,7 +4,7 @@ import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, Briefcase, Newspaper, Crown, Mail,
     Activity, Timer, Dumbbell, Waves, Footprints, CheckCircle, AlertTriangle, FileText,
-    ChevronDown, ChevronUp, Flame, Calendar
+    ChevronDown, ChevronUp, Flame, Calendar,User
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
