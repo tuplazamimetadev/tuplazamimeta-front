@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, Menu, X, Bell, Search,
     BookOpen, Brain, Briefcase, Newspaper, Crown, Mail,
-    Activity, LogOut, CheckCircle, Calendar, Settings, CreditCard, Trash2
+    Activity, LogOut, CheckCircle, Calendar, Settings, CreditCard
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -14,7 +14,7 @@ const Navbar = ({ user, activePage, onSearch }) => {
     // --- ESTADOS DE UI ---
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [isNotifOpen, setIsNotifOpen] = useState(false); // Dropdown notificaciones
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
     // --- ESTADOS DE DATOS ---
     const [notifications, setNotifications] = useState([]);
@@ -39,13 +39,12 @@ const Navbar = ({ user, activePage, onSearch }) => {
                 })
                 .catch(err => console.error("Error cargando notificaciones", err));
         }
-    }, [user]); // Se recarga si cambia el usuario o monta el componente
+    }, [user]);
 
     // --- 2. MANEJAR BÚSQUEDA ---
     const handleSearchChange = (e) => {
         const term = e.target.value;
         setSearchTerm(term);
-        // Comunicar al padre (la página actual) que hay un término de búsqueda
         if (onSearch) {
             onSearch(term);
         }
@@ -55,7 +54,6 @@ const Navbar = ({ user, activePage, onSearch }) => {
     const markAsRead = async (id) => {
         const token = localStorage.getItem('jwt_token');
         
-        // Optimismo en UI: actualizamos antes de que el servidor responda
         const updatedNotifs = notifications.map(n => n.id === id ? { ...n, read: true } : n);
         setNotifications(updatedNotifs);
         setUnreadCount(updatedNotifs.filter(n => !n.read).length);
@@ -93,10 +91,8 @@ const Navbar = ({ user, activePage, onSearch }) => {
         return "px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center";
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return 'Indefinido';
-        return new Date(dateString).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
-    };
+    // --- CORRECCIÓN: Eliminada función formatDate() ---
+    // El backend ya envía el string formateado ("17/02/2026" o "Ilimitado")
 
     return (
         <>
@@ -228,9 +224,7 @@ const Navbar = ({ user, activePage, onSearch }) => {
                     </div>
                 </div>
 
-                {/* =======================================================
-                    MENÚ MÓVIL DESPLEGABLE (RESPONSIVE)
-                   ======================================================= */}
+                {/* MENÚ MÓVIL DESPLEGABLE */}
                 {isMenuOpen && (
                     <div className="md:hidden mt-4 pt-4 border-t border-slate-700 animate-in fade-in slide-in-from-top-2">
                         <div className="grid gap-2">
@@ -262,7 +256,6 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                 <Crown className="h-5 w-5 mr-3"/> Mi Plan
                             </button>
                             
-                            {/* Opciones de usuario en móvil */}
                             <div className="border-t border-slate-700 mt-2 pt-4">
                                 <div className="flex items-center px-4 mb-4">
                                     <div className="h-10 w-10 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg mr-3">
@@ -302,7 +295,7 @@ const Navbar = ({ user, activePage, onSearch }) => {
                         <div className="p-6 space-y-6">
                             <div 
                                 className="bg-slate-50 rounded-xl p-4 border border-slate-100 cursor-pointer hover:border-blue-300 transition group"
-                                onClick={() => navigate('/suscripcion')} // Clic para gestionar plan
+                                onClick={() => navigate('/suscripcion')} 
                             >
                                 <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex justify-between">
                                     Tu Suscripción
@@ -315,8 +308,9 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Válida hasta:</span>
+                                        {/* CORRECCIÓN AQUÍ: Mostrar string directo */}
                                         <span className="font-bold text-slate-800 flex items-center">
-                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {formatDate(user.expiration)}
+                                            <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {user.expiration || 'Indefinido'}
                                         </span>
                                     </div>
                                 </div>
@@ -324,7 +318,7 @@ const Navbar = ({ user, activePage, onSearch }) => {
                             <ul className="space-y-1">
                                 <li>
                                     <button 
-                                        onClick={() => navigate('/perfil')} // Clic Configuración -> /perfil
+                                        onClick={() => navigate('/perfil')} 
                                         className="w-full flex items-center px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition text-sm"
                                     >
                                         <Settings className="h-4 w-4 mr-3" /> Configuración
@@ -332,7 +326,7 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                 </li>
                                 <li>
                                     <button 
-                                        onClick={() => navigate('/suscripcion')} // Clic Facturación -> /suscripcion
+                                        onClick={() => navigate('/suscripcion')} 
                                         className="w-full flex items-center px-3 py-2 text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition text-sm"
                                     >
                                         <CreditCard className="h-4 w-4 mr-3" /> Facturación
