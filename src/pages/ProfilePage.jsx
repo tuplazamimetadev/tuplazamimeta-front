@@ -11,7 +11,7 @@ const ProfilePage = () => {
     const navigate = useNavigate();
     
     // Estados de datos
-    const [userData, setUserData] = useState({ name: '', email: '', role: '', expiration: null });
+    const [userData, setUserData] = useState({ name: '', email: '', role: '', expiration: '' });
     const [passData, setPassData] = useState({ new: '', confirm: '' });
     
     // Estados de UI
@@ -25,7 +25,14 @@ const ProfilePage = () => {
 
         fetch(`${API_URL}/api/users/me`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.json())
-            .then(data => setUserData(data))
+            .then(data => {
+                setUserData({
+                    name: data.name,
+                    email: data.email,
+                    role: data.role,
+                    expiration: data.expiration // Guardamos el string tal cual ("17/02/2026" o "Ilimitado")
+                });
+            })
             .catch(() => navigate('/login'));
     }, [navigate]);
 
@@ -75,9 +82,17 @@ const ProfilePage = () => {
         }
     };
 
+    // Función auxiliar para mostrar el nombre bonito del rol
+    const getRoleDisplayName = (role) => {
+        if (role === 'ADMIN' || role === 'PROFESOR') return 'Cuenta Administrador';
+        if (role === 'PREMIUM' || role === 'COMPLETO') return 'Opositor Completo';
+        if (role === 'TEST') return 'Solo Test';
+        if (role === 'SUPUESTOS' || role === 'PRACTICAL') return 'Solo Supuestos';
+        return 'Plan Gratuito'; 
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            {/* Navbar activa en la sección 'perfil' (aunque no salga en el menú, sirve para el contexto) */}
             <Navbar user={userData} activePage="perfil" />
 
             <div className="container mx-auto px-6 py-12 max-w-5xl">
@@ -95,7 +110,7 @@ const ProfilePage = () => {
                         {/* Tarjeta de Perfil */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                             <div className="h-24 w-24 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg border-4 border-white">
-                                {userData.name?.charAt(0) || 'U'}
+                                {userData.name?.charAt(0).toUpperCase() || 'U'}
                             </div>
                             <h2 className="font-bold text-xl text-slate-800 break-words">{userData.name}</h2>
                             <span className="inline-block bg-slate-100 text-slate-600 text-xs px-3 py-1 rounded-full font-bold mt-2 uppercase tracking-wide border border-slate-200">
@@ -111,16 +126,15 @@ const ProfilePage = () => {
                             <div className="mb-4">
                                 <p className="text-sm text-slate-500 mb-1">Plan actual:</p>
                                 <p className="font-bold text-slate-900 text-lg flex items-center gap-2">
-                                    {userData.role === 'PREMIUM' || userData.role === 'COMPLETO' ? 'Opositor Completo' : 
-                                     userData.role === 'TEST' ? 'Solo Test' : 
-                                     userData.role === 'SUPUESTOS' ? 'Solo Supuestos' : 'Básico'}
+                                    {getRoleDisplayName(userData.role)}
                                     <CheckCircle className="h-4 w-4 text-green-500" />
                                 </p>
                             </div>
                             
                             {userData.expiration && (
                                 <div className="mb-6 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                                    Válido hasta: <strong>{new Date(userData.expiration).toLocaleDateString()}</strong>
+                                    {/* CORREGIDO: Usamos la variable directa, sin new Date() */}
+                                    Válido hasta: <strong>{userData.expiration}</strong>
                                 </div>
                             )}
 
