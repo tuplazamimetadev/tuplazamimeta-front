@@ -15,6 +15,9 @@ const DownloadsPage = () => {
     // --- ESTADOS ---
     const [contents, setContents] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // --- NUEVO: Estado para el buscador ---
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Estado inicial de usuario
     const [userData, setUserData] = useState({
@@ -123,10 +126,18 @@ const DownloadsPage = () => {
     // --- PERMISOS ---
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
-    // --- AGRUPACIÓN DE TEMAS ---
-    const groupA = contents.filter(t => t.title.startsWith('A.'));
-    const groupB = contents.filter(t => t.title.startsWith('B.'));
-    const others = contents.filter(t => !t.title.startsWith('A.') && !t.title.startsWith('B.'));
+    // --- FILTRADO Y AGRUPACIÓN (AQUÍ ESTÁ LA MAGIA) ---
+    // 1. Primero filtramos por lo que ha escrito el usuario
+    const filteredContents = contents.filter(topic => {
+        const term = searchTerm.toLowerCase();
+        return topic.title.toLowerCase().includes(term) || 
+               (topic.description && topic.description.toLowerCase().includes(term));
+    });
+
+    // 2. Luego agrupamos SOBRE LOS RESULTADOS FILTRADOS
+    const groupA = filteredContents.filter(t => t.title.startsWith('A.'));
+    const groupB = filteredContents.filter(t => t.title.startsWith('B.'));
+    const others = filteredContents.filter(t => !t.title.startsWith('A.') && !t.title.startsWith('B.'));
 
     // Helper para renderizar una lista de temas
     const renderTopics = (topicList) => (
@@ -154,7 +165,7 @@ const DownloadsPage = () => {
                                             file.type === 'TEST' ? 'bg-green-50 text-green-600' :
                                                 file.type === 'WORD' ? 'bg-blue-50 text-blue-600' :
                                                     'bg-gray-100 text-gray-600'
-                                        }`}>
+                                    }`}>
                                         {getIcon(file.type)}
                                     </div>
                                     <div className="min-w-0">
@@ -192,7 +203,8 @@ const DownloadsPage = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
-            <Navbar user={userData} activePage="temario" />
+            {/* Pasamos onSearch para conectar el buscador del Navbar */}
+            <Navbar user={userData} activePage="temario" onSearch={setSearchTerm} />
 
             <div className="container mx-auto px-6 py-12">
                 <div className="mb-10 animate-fade-in-up">
@@ -202,7 +214,7 @@ const DownloadsPage = () => {
 
                 <UploadManager
                     userRole={userData.role}
-                    topics={contents}
+                    topics={contents} // Pasamos todos para que el selector del upload funcione
                     onUploadSuccess={fetchContents}
                 />
 
@@ -210,6 +222,15 @@ const DownloadsPage = () => {
 
                 {!loading && (
                     <div className="max-w-6xl mx-auto">
+                        
+                        {/* Aviso si buscamos algo y no hay nada */}
+                        {filteredContents.length === 0 && searchTerm !== '' && (
+                            <div className="text-center py-10 text-slate-500 bg-white rounded-xl border border-slate-100 shadow-sm mb-8">
+                                <p>No hemos encontrado temas que coincidan con <strong>"{searchTerm}"</strong>.</p>
+                                <button onClick={() => setSearchTerm('')} className="mt-2 text-blue-600 text-sm font-bold hover:underline">Limpiar búsqueda</button>
+                            </div>
+                        )}
+
                         {groupA.length > 0 && (
                             <div className="mb-12">
                                 <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-blue-500">
@@ -243,7 +264,8 @@ const DownloadsPage = () => {
                             </div>
                         )}
 
-                        {contents.length === 0 && (
+                        {/* Mensaje original de lista vacía si no hay nada cargado */}
+                        {contents.length === 0 && !loading && (
                             <div className="text-center py-20 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                                 <p className="text-slate-400 font-medium">No hay contenido disponible.</p>
                             </div>
