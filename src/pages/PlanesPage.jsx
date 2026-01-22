@@ -30,7 +30,7 @@ const PlanesPage = () => {
       .then(data => {
         // CORRECCIÓN: Mapear los códigos exactos que usa el Backend (SubscriptionController)
         let internalRole = 'STUDENT';
-        
+
         // El backend devuelve códigos como "TEST", "SUPUESTOS", "COMPLETO" o "ADMIN"
         if (data.role === 'TEST') internalRole = 'TEST';
         if (data.role === 'SUPUESTOS') internalRole = 'PRACTICAL';
@@ -48,29 +48,18 @@ const PlanesPage = () => {
   }, [navigate]);
 
   // --- COMPRAR / ACTUALIZAR ---
-  const handleUpgrade = async (planName) => {
+  const handleUpgrade = (planName) => {
+    // LÓGICA TEMPORAL HASTA IMPLEMENTAR PAGOS
+    alert(`¡Gracias por tu interés en el plan ${planName}!\n\nEstamos finalizando la integración de la pasarela de pago segura.\nPróximamente podrás suscribirte automáticamente.`);
+
+    /* --- CÓDIGO ANTIGUO (DESACTIVADO) ---
     if (!window.confirm(`¿Confirmar suscripción al plan ${planName}?`)) return;
-    
     const token = localStorage.getItem('jwt_token');
     try {
-        const res = await fetch(`${API_URL}/api/subscription/upgrade`, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ plan: planName }) // Enviamos el nombre del plan
-        });
-
-        if (res.ok) {
-            alert("¡Plan actualizado con éxito! Disfruta de 30 días más.");
-            window.location.reload(); 
-        } else {
-            alert("Error al procesar el pago/actualización.");
-        }
-    } catch (err) {
-        console.error(err);
-    }
+        const res = await fetch(`${API_URL}/api/subscription/upgrade`, { ... });
+        if (res.ok) { window.location.reload(); }
+    } catch (err) { console.error(err); }
+    */
   };
 
   return (
