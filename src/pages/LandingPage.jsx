@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Shield, CheckCircle, Play, Menu, X, ArrowRight, Star, Users, BookOpen, Video, LogIn, User, LogOut, Target, Brain, Award, MessageCircle
 } from 'lucide-react';
-// Importamos tu logo desde assets
-import imagenLogo from '../assets/logo.jpeg';
+import imagenLogo from '../assets/logo.jpeg'; 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -16,7 +15,6 @@ const LandingPage = () => {
 
     const navigate = useNavigate();
 
-    // --- DETECTAR USUARIO ---
     useEffect(() => {
         const token = localStorage.getItem('jwt_token');
         const name = localStorage.getItem('user_name');
@@ -27,7 +25,6 @@ const LandingPage = () => {
         }
     }, []);
 
-    // --- DETECTAR SCROLL PARA NAVBAR ---
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
@@ -45,35 +42,33 @@ const LandingPage = () => {
         navigate('/');
     };
 
-    // IMAGEN DE FONDO (Debe estar en la carpeta /public)
     const bgImage = "/logopoli.jpg";
 
     return (
         <div className="font-sans text-slate-800 bg-slate-50 overflow-x-hidden">
 
-            {/* --- NAVBAR MEJORADO --- */}
-            <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled
-                    ? 'bg-slate-900/95 backdrop-blur-xl border-b border-white/10 py-3 shadow-2xl'
-                    : 'bg-transparent pt-8 pb-6'
-                }`}>
+            {/* --- NAVBAR --- */}
+            <nav className={`fixed w-full z-50 transition-all duration-300 ${
+                isScrolled 
+                ? 'bg-slate-900/95 backdrop-blur-xl border-b border-white/10 py-3 shadow-2xl' 
+                : 'bg-transparent pt-4 pb-4 md:pt-8 md:pb-6' // Ajustado padding en móvil
+            }`}>
                 <div className="container mx-auto flex justify-between items-center px-6">
-                    {/* LOGO NAVBAR */}
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
                         <div className="relative">
                             <div className="absolute inset-0 bg-yellow-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
-                            <Shield className="h-10 w-10 text-yellow-500 fill-yellow-500/10 relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
+                            <Shield className="h-8 w-8 md:h-10 md:w-10 text-yellow-500 fill-yellow-500/10 relative z-10 transform group-hover:scale-110 transition-transform duration-300" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-2xl font-black tracking-widest uppercase text-white leading-none">
+                            <span className="text-xl md:text-2xl font-black tracking-widest uppercase text-white leading-none">
                                 TUPLAZA<span className="text-yellow-400">MIMETA</span>
                             </span>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] group-hover:text-yellow-200 transition-colors">
+                            <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] group-hover:text-yellow-200 transition-colors">
                                 Academia Online
                             </span>
                         </div>
                     </div>
 
-                    {/* MENÚ DESKTOP */}
                     <div className="hidden md:flex items-center gap-10">
                         <div className="flex gap-8 text-base font-bold text-slate-200">
                             <button className="text-yellow-400 border-b-2 border-yellow-400 pb-1">Inicio</button>
@@ -111,24 +106,23 @@ const LandingPage = () => {
 
                     <div className="md:hidden">
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2 bg-white/10 rounded-lg backdrop-blur-md border border-white/10">
-                            {isMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+                            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                         </button>
                     </div>
                 </div>
 
-                {/* MENÚ MÓVIL */}
                 {isMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-slate-900/95 backdrop-blur-xl border-t border-white/10 p-6 shadow-2xl animate-fade-in-down">
-                        <div className="flex flex-col gap-4 text-lg font-bold text-slate-300">
+                    <div className="md:hidden absolute top-full left-0 w-full bg-slate-900/95 backdrop-blur-xl border-t border-white/10 p-6 shadow-2xl animate-fade-in-down h-screen">
+                        <div className="flex flex-col gap-6 text-xl font-bold text-slate-300 mt-4">
                             <button className="text-left text-yellow-400 py-2 border-b border-white/10">Inicio</button>
                             <button onClick={() => navigate('/guia')} className="text-left py-2 border-b border-white/10 hover:text-white">Guía</button>
                             <button onClick={() => navigate('/tarifas')} className="text-left py-2 hover:text-white">Tarifas</button>
                         </div>
-                        <div className="mt-8 pt-6 border-t border-white/10">
+                        <div className="mt-10 pt-6 border-t border-white/10">
                             {isLoggedIn ? (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     <button onClick={() => navigate('/descargas')} className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg">Ir al Aula Virtual</button>
-                                    <button onClick={handleLogout} className="w-full bg-slate-800 text-red-400 py-3 rounded-xl font-bold">Cerrar Sesión</button>
+                                    <button onClick={handleLogout} className="w-full bg-slate-800 text-red-400 py-4 rounded-xl font-bold">Cerrar Sesión</button>
                                 </div>
                             ) : (
                                 <button onClick={() => navigate('/login')} className="w-full bg-yellow-500 text-slate-900 py-4 rounded-xl font-bold text-lg shadow-lg">Iniciar Sesión</button>
@@ -138,43 +132,48 @@ const LandingPage = () => {
                 )}
             </nav>
 
-            {/* --- HERO SECTION --- */}
-            <header className="relative h-screen min-h-[700px] flex items-center justify-center overflow-hidden">
-                {/* Imagen de Fondo */}
+            {/* --- HERO SECTION CORREGIDA PARA MÓVIL --- */}
+            {/* Cambiado h-screen por min-h-screen para que crezca si el contenido es largo en móvil */}
+            <header className="relative min-h-screen flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
                     <img src={bgImage} alt="Fondo Policía" className="w-full h-full object-cover object-center transform scale-105 animate-slow-zoom" />
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-slate-900/30"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-80"></div>
                 </div>
 
-                <div className="container mx-auto px-6 relative z-10 grid md:grid-cols-12 gap-12 items-center h-full pb-12 pt-24">
+                {/* AÑADIDO pb-32 en móvil para dar espacio abajo y evitar solapamiento */}
+                <div className="container mx-auto px-6 relative z-10 grid md:grid-cols-12 gap-12 items-center h-full pt-28 pb-32 md:pb-12">
                     <div className="md:col-span-8 animate-fade-in-up flex flex-col justify-center">
                         <div>
-                            <div className="inline-flex items-center bg-blue-600/30 border border-blue-400/50 text-blue-100 px-5 py-2 rounded-full text-sm font-bold mb-8 backdrop-blur-md shadow-sm">
-                                <span className="w-3 h-3 bg-blue-400 rounded-full mr-3 animate-pulse ring-4 ring-blue-400/30"></span>
+                            <div className="inline-flex items-center bg-blue-600/30 border border-blue-400/50 text-blue-100 px-4 py-1.5 md:px-5 md:py-2 rounded-full text-xs md:text-sm font-bold mb-6 md:mb-8 backdrop-blur-md shadow-sm">
+                                <span className="w-2 h-2 md:w-3 md:h-3 bg-blue-400 rounded-full mr-2 md:mr-3 animate-pulse ring-4 ring-blue-400/30"></span>
                                 Convocatoria 2026 Castilla y León
                             </div>
-                            <h1 className="text-6xl md:text-8xl font-black text-white leading-none mb-8 drop-shadow-2xl tracking-tight">
+                            
+                            {/* AJUSTADO TAMAÑO TEXTO MÓVIL: text-4xl en vez de 6xl */}
+                            <h1 className="text-4xl sm:text-5xl md:text-8xl font-black text-white leading-tight md:leading-none mb-6 md:mb-8 drop-shadow-2xl tracking-tight">
                                 TU UNIFORME <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 filter drop-shadow-[0_2px_10px_rgba(234,179,8,0.5)]">
                                     TE ESPERA.
                                 </span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-slate-200 mb-12 leading-relaxed max-w-2xl font-medium opacity-90">
+                            
+                            <p className="text-lg md:text-2xl text-slate-200 mb-8 md:mb-12 leading-relaxed max-w-2xl font-medium opacity-90">
                                 La plataforma inteligente que adapta el estudio a tu ritmo. Tests ilimitados, simulacros reales y el mejor equipo docente.
                             </p>
-                            <div className="flex flex-col sm:flex-row space-y-5 sm:space-y-0 sm:space-x-6">
+                            
+                            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
                                 {isLoggedIn ? (
-                                    <button onClick={() => navigate('/descargas')} className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl shadow-green-900/40 transition transform hover:-translate-y-1 flex items-center justify-center">
-                                        Continuar Estudiando <ArrowRight className="ml-3 h-6 w-6" />
+                                    <button onClick={() => navigate('/descargas')} className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold text-lg md:text-xl shadow-xl shadow-green-900/40 transition transform hover:-translate-y-1 flex items-center justify-center">
+                                        Continuar Estudiando <ArrowRight className="ml-3 h-5 w-5 md:h-6 md:w-6" />
                                     </button>
                                 ) : (
-                                    <button onClick={() => navigate('/registro')} className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl shadow-blue-900/40 transition transform hover:-translate-y-1 flex items-center justify-center">
-                                        Empezar Gratis <ArrowRight className="ml-3 h-6 w-6" />
+                                    <button onClick={() => navigate('/registro')} className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-500 hover:to-blue-700 text-white px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold text-lg md:text-xl shadow-xl shadow-blue-900/40 transition transform hover:-translate-y-1 flex items-center justify-center">
+                                        Empezar Gratis <ArrowRight className="ml-3 h-5 w-5 md:h-6 md:w-6" />
                                     </button>
                                 )}
-                                <button onClick={() => navigate('/login')} className="group bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white px-10 py-5 rounded-2xl font-bold text-xl transition backdrop-blur-md flex items-center justify-center">
-                                    <Play className="mr-3 h-6 w-6 fill-white opacity-80 group-hover:opacity-100 transition" /> Ver Demo
+                                <button onClick={() => navigate('/login')} className="group bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white px-8 py-4 md:px-10 md:py-5 rounded-2xl font-bold text-lg md:text-xl transition backdrop-blur-md flex items-center justify-center">
+                                    <Play className="mr-3 h-5 w-5 md:h-6 md:w-6 fill-white opacity-80 group-hover:opacity-100 transition" /> Ver Demo
                                 </button>
                             </div>
                         </div>
@@ -182,14 +181,12 @@ const LandingPage = () => {
                     <div className="md:col-span-4"></div>
                 </div>
 
-                {/* --- NUEVO: LOGO FLOTANTE ABAJO A LA DERECHA --- */}
+                {/* LOGO FLOTANTE */}
                 <div className="absolute bottom-8 right-8 hidden md:block animate-fade-in-up delay-500 z-20">
-                    {/* Contenedor con efecto cristal y borde sutil para que el logo resalte */}
                     <div className="bg-white/5 backdrop-blur-lg p-4 rounded-3xl border border-white/10 shadow-2xl transform hover:scale-105 transition-all duration-300 hover:bg-white/10 hover:border-white/30">
                         <img
                             src={imagenLogo}
                             alt="Logo Tu Plaza Mi Meta"
-                            // Tamaño medio (w-32 en pantallas normales, w-40 en grandes) y esquinas redondeadas
                             className="w-32 lg:w-40 h-auto rounded-2xl shadow-md"
                         />
                     </div>
@@ -197,111 +194,112 @@ const LandingPage = () => {
             </header>
 
             {/* LOGOS AUTORIDAD */}
-            <section className="bg-white py-16 border-b border-slate-100 relative z-20 -mt-8 rounded-t-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)]">
+            {/* Reducido el margen negativo en móvil (-mt-4) para que no suba tanto */}
+            <section className="bg-white py-12 md:py-16 border-b border-slate-100 relative z-20 -mt-4 md:-mt-8 rounded-t-[2rem] md:rounded-t-[3rem] shadow-[0_-20px_60px_rgba(0,0,0,0.1)]">
                 <div className="container mx-auto px-6 text-center">
-                    <p className="text-slate-400 mb-10 font-bold tracking-[0.2em] text-sm uppercase">Método avalado por expertos</p>
-                    <div className="flex flex-wrap justify-center gap-12 md:gap-32 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-                        <div className="flex flex-col items-center gap-3 group">
-                            <Star className="h-10 w-10 text-yellow-500 fill-current group-hover:scale-110 transition shadow-sm" />
-                            <span className="font-bold text-xl text-slate-700">+10 Años experiencia</span>
+                    <p className="text-slate-400 mb-8 md:mb-10 font-bold tracking-[0.2em] text-xs md:text-sm uppercase">Método avalado por expertos</p>
+                    <div className="flex flex-wrap justify-center gap-8 md:gap-32 opacity-70 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+                        <div className="flex flex-col items-center gap-2 md:gap-3 group">
+                            <Star className="h-8 w-8 md:h-10 md:w-10 text-yellow-500 fill-current group-hover:scale-110 transition shadow-sm" />
+                            <span className="font-bold text-lg md:text-xl text-slate-700">+10 Años</span>
                         </div>
-                        <div className="flex flex-col items-center gap-3 group">
-                            <Users className="h-10 w-10 text-blue-600 fill-current group-hover:scale-110 transition shadow-sm" />
-                            <span className="font-bold text-xl text-slate-700">Profesores policías</span>
+                        <div className="flex flex-col items-center gap-2 md:gap-3 group">
+                            <Users className="h-8 w-8 md:h-10 md:w-10 text-blue-600 fill-current group-hover:scale-110 transition shadow-sm" />
+                            <span className="font-bold text-lg md:text-xl text-slate-700">Profesores policías</span>
                         </div>
-                        <div className="flex flex-col items-center gap-3 group">
-                            <Shield className="h-10 w-10 text-slate-700 fill-current group-hover:scale-110 transition shadow-sm" />
-                            <span className="font-bold text-xl text-slate-700">Material Oficial</span>
+                        <div className="flex flex-col items-center gap-2 md:gap-3 group">
+                            <Shield className="h-8 w-8 md:h-10 md:w-10 text-slate-700 fill-current group-hover:scale-110 transition shadow-sm" />
+                            <span className="font-bold text-lg md:text-xl text-slate-700">Material Oficial</span>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* --- GRID DE 6 TARJETAS --- */}
-            <section className="py-24 container mx-auto px-6">
-                <div className="text-center mb-20">
+            <section className="py-16 md:py-24 container mx-auto px-6">
+                <div className="text-center mb-12 md:mb-20">
                     <div className="inline-block bg-blue-50 text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider mb-4 border border-blue-100">
                         Academia 360º
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6">
-                        Todo para tu <span className="text-blue-600 underline decoration-yellow-400 underline-offset-8 decoration-4">Apto</span>
+                    <h2 className="text-3xl md:text-6xl font-black text-slate-900 mb-4 md:mb-6">
+                        Todo para tu <span className="text-blue-600 underline decoration-yellow-400 underline-offset-4 md:underline-offset-8 decoration-4">Apto</span>
                     </h2>
-                    <p className="text-xl text-slate-500 max-w-3xl mx-auto">
-                        Hemos unificado todas las herramientas que necesitas en una sola plataforma. Sin parches, sin libros obsoletos.
+                    <p className="text-lg md:text-xl text-slate-500 max-w-3xl mx-auto">
+                        Hemos unificado todas las herramientas que necesitas en una sola plataforma.
                     </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     {/* 1. Temario */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl hover:shadow-2xl border border-slate-100 transition-all duration-300 hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 transition-transform">
-                            <BookOpen className="h-8 w-8" />
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 transition-all duration-300 group">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                            <BookOpen className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">Temario Vivo</h3>
-                        <p className="text-slate-500 leading-relaxed text-lg">Actualizado el mismo día que sale en el BOE. Siempre estudiarás la versión vigente.</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3 group-hover:text-blue-600 transition-colors">Temario Vivo</h3>
+                        <p className="text-slate-500 leading-relaxed text-base md:text-lg">Actualizado el mismo día que sale en el BOE. Siempre estudiarás la versión vigente.</p>
                     </div>
 
-                    {/* 2. Tests (Destacada) */}
-                    <div className="bg-slate-900 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+                    {/* 2. Tests */}
+                    <div className="bg-slate-900 p-6 md:p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-48 h-48 bg-yellow-500/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-yellow-500/20 transition-colors"></div>
                         <div className="relative z-10">
-                            <div className="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center text-yellow-400 mb-6 group-hover:scale-110 transition-transform">
-                                <Target className="h-8 w-8" />
+                            <div className="w-14 h-14 md:w-16 md:h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center text-yellow-400 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                                <Target className="h-7 w-7 md:h-8 md:w-8" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white mb-3">Tests Interactivos</h3>
-                            <p className="text-slate-300 leading-relaxed text-lg">Test totalmente interactivos dentro del aula virtual, con actualziaciones mensuales.</p>
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">Tests Inteligentes</h3>
+                            <p className="text-slate-300 leading-relaxed text-base md:text-lg">Algoritmos que detectan tus puntos débiles. No repitas preguntas que ya sabes.</p>
                         </div>
                     </div>
 
                     {/* 3. Clases */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl hover:shadow-2xl border border-slate-100 transition-all duration-300 hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 transition-transform">
-                            <Video className="h-8 w-8" />
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 transition-all duration-300 group">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                            <Video className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-purple-600 transition-colors">Clases 4K</h3>
-                        <p className="text-slate-500 leading-relaxed text-lg">Videoclases grabadas y sesiones en directo. Explicaciones claras de policías en activo.</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3 group-hover:text-purple-600 transition-colors">Clases 4K</h3>
+                        <p className="text-slate-500 leading-relaxed text-base md:text-lg">Videoclases grabadas y sesiones en directo. Explicaciones claras de policías en activo.</p>
                     </div>
 
                     {/* 4. Supuestos */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl hover:shadow-2xl border border-slate-100 transition-all duration-300 hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-6 group-hover:scale-110 transition-transform">
-                            <Brain className="h-8 w-8" />
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 transition-all duration-300 group">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                            <Brain className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-green-600 transition-colors">Supuestos Prácticos</h3>
-                        <p className="text-slate-500 leading-relaxed text-lg">La clave del apto. Creados por profesionales y actualizados con casos reales recientes.</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3 group-hover:text-green-600 transition-colors">Supuestos Prácticos</h3>
+                        <p className="text-slate-500 leading-relaxed text-base md:text-lg">La clave del apto. Creados por profesionales y actualizados con casos reales recientes.</p>
                     </div>
 
                     {/* 5. Físicas */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl hover:shadow-2xl border border-slate-100 transition-all duration-300 hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mb-6 group-hover:scale-110 transition-transform">
-                            <Award className="h-8 w-8" />
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 transition-all duration-300 group">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                            <Award className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-red-600 transition-colors">Entrenamiento Físico</h3>
-                        <p className="text-slate-500 leading-relaxed text-lg">Planes específicos para las pruebas físicas de Policía Local. No pierdas puntos en la pista.</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3 group-hover:text-red-600 transition-colors">Entrenamiento Físico</h3>
+                        <p className="text-slate-500 leading-relaxed text-base md:text-lg">Planes específicos para las pruebas físicas de Policía Local. No pierdas puntos en la pista.</p>
                     </div>
 
                     {/* 6. Tutorías */}
-                    <div className="bg-white p-8 rounded-[2rem] shadow-xl hover:shadow-2xl border border-slate-100 transition-all duration-300 hover:-translate-y-2 group">
-                        <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
-                            <MessageCircle className="h-8 w-8" />
+                    <div className="bg-white p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 transition-all duration-300 group">
+                        <div className="w-14 h-14 md:w-16 md:h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-4 md:mb-6 group-hover:scale-110 transition-transform">
+                            <MessageCircle className="h-7 w-7 md:h-8 md:w-8" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors">Tutorías 24h</h3>
-                        <p className="text-slate-500 leading-relaxed text-lg">No estás solo. Contacta con profesores expertos y resuelve tus dudas jurídicas en menos de 24h.</p>
+                        <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-2 md:mb-3 group-hover:text-indigo-600 transition-colors">Tutorías 24h</h3>
+                        <p className="text-slate-500 leading-relaxed text-base md:text-lg">No estás solo. Contacta con profesores expertos y resuelve tus dudas jurídicas en menos de 24h.</p>
                     </div>
                 </div>
             </section>
 
             {/* --- CTA FINAL --- */}
-            <section className="py-24 bg-gradient-to-br from-blue-900 to-slate-900 text-white relative overflow-hidden">
+            <section className="py-16 md:py-24 bg-gradient-to-br from-blue-900 to-slate-900 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                 <div className="container mx-auto px-6 text-center relative z-10">
-                    <h2 className="text-4xl md:text-6xl font-black mb-8">¿Listo para conseguir tu placa?</h2>
-                    <p className="text-xl text-blue-200 mb-12 max-w-2xl mx-auto">
+                    <h2 className="text-3xl md:text-6xl font-black mb-6 md:mb-8">¿Listo para conseguir tu placa?</h2>
+                    <p className="text-lg md:text-xl text-blue-200 mb-8 md:mb-12 max-w-2xl mx-auto">
                         Únete hoy a la academia con mayor índice de aprobados de Castilla y León.
                     </p>
-                    <button
+                    <button 
                         onClick={() => navigate('/tarifas')}
-                        className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 px-12 py-6 rounded-2xl font-black text-xl shadow-[0_0_40px_rgba(234,179,8,0.4)] transition-all transform hover:scale-105"
+                        className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 px-8 py-4 md:px-12 md:py-6 rounded-2xl font-black text-lg md:text-xl shadow-[0_0_40px_rgba(234,179,8,0.4)] transition-all transform hover:scale-105"
                     >
                         VER PLANES Y PRECIOS
                     </button>
@@ -309,40 +307,40 @@ const LandingPage = () => {
             </section>
 
             {/* --- FOOTER --- */}
-            <footer className="bg-white pt-20 pb-10 border-t border-slate-200">
+            <footer className="bg-white pt-16 md:pt-20 pb-10 border-t border-slate-200">
                 <div className="container mx-auto px-6">
-                    <div className="grid md:grid-cols-4 gap-12 mb-16">
+                    <div className="grid md:grid-cols-4 gap-8 md:gap-12 mb-12 md:mb-16">
                         <div className="col-span-1 md:col-span-1">
-                            <div className="flex items-center gap-2 mb-6">
-                                <Shield className="h-8 w-8 text-yellow-500 fill-current" />
-                                <span className="text-xl font-black text-slate-900 uppercase">TUPLAZAMIMETA</span>
+                            <div className="flex items-center gap-2 mb-4 md:mb-6">
+                                <Shield className="h-6 w-6 md:h-8 md:w-8 text-yellow-500 fill-current" />
+                                <span className="text-lg md:text-xl font-black text-slate-900 uppercase">TUPLAZAMIMETA</span>
                             </div>
-                            <p className="text-slate-500 leading-relaxed">
+                            <p className="text-slate-500 leading-relaxed text-sm md:text-base">
                                 Plataforma líder en formación policial. Tecnología, pasión y resultados.
                             </p>
                         </div>
                         <div>
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase text-sm tracking-wider">Explora</h4>
-                            <ul className="space-y-4 text-slate-600 font-medium">
+                            <h4 className="font-bold text-slate-900 mb-4 md:mb-6 uppercase text-sm tracking-wider">Explora</h4>
+                            <ul className="space-y-3 md:space-y-4 text-slate-600 font-medium text-sm md:text-base">
                                 <li><button onClick={() => navigate('/')} className="hover:text-blue-600 transition">Inicio</button></li>
                                 <li><button onClick={() => navigate('/guia')} className="hover:text-blue-600 transition">Guía Opositor</button></li>
                                 <li><button onClick={() => navigate('/tarifas')} className="hover:text-blue-600 transition">Precios</button></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase text-sm tracking-wider">Comunidad</h4>
-                            <ul className="space-y-4 text-slate-600 font-medium">
+                            <h4 className="font-bold text-slate-900 mb-4 md:mb-6 uppercase text-sm tracking-wider">Comunidad</h4>
+                            <ul className="space-y-3 md:space-y-4 text-slate-600 font-medium text-sm md:text-base">
                                 <li><button onClick={() => navigate('/login')} className="hover:text-blue-600 transition">Blog Opositor</button></li>
                                 <li><button onClick={() => navigate('/login')} className="hover:text-blue-600 transition">Foro de dudas</button></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold text-slate-900 mb-6 uppercase text-sm tracking-wider">Contacto</h4>
-                            <p className="text-slate-500 mb-2">¿Dudas?</p>
-                            <a href="mailto:tuplazamimeta@gmail.com" className="text-lg font-bold text-blue-600 hover:underline">tuplazamimeta@gmail.com</a>
+                            <h4 className="font-bold text-slate-900 mb-4 md:mb-6 uppercase text-sm tracking-wider">Contacto</h4>
+                            <p className="text-slate-500 mb-2 text-sm md:text-base">¿Dudas?</p>
+                            <a href="mailto:tuplazamimeta@gmail.com" className="text-base md:text-lg font-bold text-blue-600 hover:underline">tuplazamimeta@gmail.com</a>
                         </div>
                     </div>
-                    <div className="border-t border-slate-100 pt-8 text-center text-slate-400 text-sm font-medium">
+                    <div className="border-t border-slate-100 pt-8 text-center text-slate-400 text-xs md:text-sm font-medium">
                         © {new Date().getFullYear()} Tu Plaza Mi Meta S.L. · Hecho con 💙 para futuros policías.
                     </div>
                 </div>
