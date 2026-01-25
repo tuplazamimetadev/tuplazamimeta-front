@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
+// 1. IMPORTAR EL PLAYER
+import TestPlayer from '../components/TestPlayer';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -16,6 +18,9 @@ const TestsPage = () => {
     const [generalTests, setGeneralTests] = useState([]);
     const [uploadTopic, setUploadTopic] = useState([]);
     const [loading, setLoading] = useState(true);
+    
+    // 2. ESTADO PARA EL TEST ACTIVO
+    const [activeTestUrl, setActiveTestUrl] = useState(null);
 
     const [userData, setUserData] = useState({
         name: 'Cargando...', email: '', role: 'Estudiante', expiration: null
@@ -95,6 +100,14 @@ const TestsPage = () => {
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
             <Navbar user={userData} activePage="tests" />
 
+            {/* 3. RENDERIZAR EL PLAYER SI HAY UNO ACTIVO */}
+            {activeTestUrl && (
+                <TestPlayer 
+                    fileUrl={activeTestUrl} 
+                    onClose={() => setActiveTestUrl(null)} 
+                />
+            )}
+
             <div className="container mx-auto px-6 py-12">
                 <div className="animate-fade-in-up">
                     <div className="mb-10 text-center">
@@ -128,50 +141,67 @@ const TestsPage = () => {
 
                     {!loading && (
                         <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                            {generalTests.map((test) => (
-                                <article key={test.id} className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative group">
-                                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 flex justify-between items-start text-white">
-                                        <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                                            <Brain className="h-8 w-8 text-white" />
-                                        </div>
-                                        <span className="bg-black/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm">Simulacro</span>
-                                    </div>
+                            {generalTests.map((test) => {
+                                // 4. DETECTAR SI ES INTERACTIVO
+                                const isInteractive = test.url && test.url.toLowerCase().endsWith('.json');
 
-                                    <div className="p-6 flex flex-col flex-grow">
-                                        <h3 className="text-2xl font-bold text-slate-800 mb-2">{test.title}</h3>
-                                        <p className="text-slate-500 mb-6 flex-grow text-sm">
-                                            {test.description || "Examen oficial tipo test. Haz clic en 'Empezar' para descargar o ver el PDF."}
-                                        </p>
-
-                                        <div className="flex items-center space-x-6 text-sm text-slate-400 mb-6 border-t border-slate-100 pt-4">
-                                            <div className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-green-500" /> Oficial</div>
-                                            <div className="flex items-center"><Signal className="h-4 w-4 mr-2 text-yellow-500" /> General</div>
+                                return (
+                                    <article key={test.id} className="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full relative group">
+                                        <div className={`p-6 flex justify-between items-start text-white ${isInteractive ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : 'bg-gradient-to-r from-slate-700 to-slate-900'}`}>
+                                            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                                                <Brain className="h-8 w-8 text-white" />
+                                            </div>
+                                            <span className="bg-black/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                                {isInteractive ? 'Interactivo' : 'PDF / Simulacro'}
+                                            </span>
                                         </div>
 
-                                        <div className="flex space-x-3">
-                                            <a
-                                                href={test.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex-1 bg-slate-900 hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center group"
-                                            >
-                                                Empezar Test <Play className="h-4 w-4 ml-2 group-hover:translate-x-1 transition" />
-                                            </a>
+                                        <div className="p-6 flex flex-col flex-grow">
+                                            <h3 className="text-2xl font-bold text-slate-800 mb-2">{test.title}</h3>
+                                            <p className="text-slate-500 mb-6 flex-grow text-sm">
+                                                {test.description || (isInteractive ? "Pon a prueba tus conocimientos con corrección automática." : "Examen oficial en PDF para descargar.")}
+                                            </p>
 
-                                            {canEdit && (
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => handleDeleteTest(e, test.id)}
-                                                    className="bg-red-50 hover:bg-red-100 text-red-500 p-4 rounded-xl transition shadow-sm border border-red-100"
-                                                    title="Borrar simulacro"
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
-                                            )}
+                                            <div className="flex items-center space-x-6 text-sm text-slate-400 mb-6 border-t border-slate-100 pt-4">
+                                                <div className="flex items-center"><CheckCircle className="h-4 w-4 mr-2 text-green-500" /> Oficial</div>
+                                                <div className="flex items-center"><Signal className="h-4 w-4 mr-2 text-yellow-500" /> General</div>
+                                            </div>
+
+                                            <div className="flex space-x-3">
+                                                {/* 5. BOTÓN CONDICIONAL */}
+                                                {isInteractive ? (
+                                                    <button
+                                                        onClick={() => setActiveTestUrl(test.url)}
+                                                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center group"
+                                                    >
+                                                        Hacer Test <Brain className="h-4 w-4 ml-2 group-hover:scale-110 transition" />
+                                                    </button>
+                                                ) : (
+                                                    <a
+                                                        href={test.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition shadow-lg flex items-center justify-center group"
+                                                    >
+                                                        Descargar PDF <Play className="h-4 w-4 ml-2 group-hover:translate-x-1 transition" />
+                                                    </a>
+                                                )}
+
+                                                {canEdit && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => handleDeleteTest(e, test.id)}
+                                                        className="bg-red-50 hover:bg-red-100 text-red-500 p-4 rounded-xl transition shadow-sm border border-red-100"
+                                                        title="Borrar simulacro"
+                                                    >
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </article>
-                            ))}
+                                    </article>
+                                );
+                            })}
                         </div>
                     )}
 
