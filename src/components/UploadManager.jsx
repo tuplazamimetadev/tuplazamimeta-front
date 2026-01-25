@@ -3,7 +3,6 @@ import { Upload, Link as LinkIcon, CheckCircle, AlertCircle, AlignLeft, Check } 
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-// AÑADIDO: 'showDescription' para ocultar/mostrar el campo según la página
 const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopic, showDescription = false }) => {
     
     // 1. SEGURIDAD
@@ -48,7 +47,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                 headers['Content-Type'] = 'application/json';
                 body = JSON.stringify({
                     title,
-                    description, // Se envía aunque esté vacío
+                    description,
                     type,
                     url, 
                     topicId
@@ -62,7 +61,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('title', title);
-                formData.append('description', description); // Se envía al back
+                formData.append('description', description);
                 formData.append('type', type);
                 formData.append('topicId', topicId);
                 body = formData;
@@ -121,7 +120,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                     />
                 </div>
 
-                {/* 2. DESCRIPCIÓN (CONDICIONAL: Solo si showDescription es true) */}
+                {/* 2. DESCRIPCIÓN */}
                 {showDescription && (
                     <div className="col-span-2 md:col-span-1">
                         <label className="block text-sm font-bold text-slate-700 mb-2">Descripción (Opcional)</label>
@@ -138,7 +137,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                     </div>
                 )}
 
-                {/* 3. TEMA (Se oculta si está fijado) */}
+                {/* 3. TEMA */}
                 {!fixedTopic && (
                     <div className="col-span-2 md:col-span-1">
                         <label className="block text-sm font-bold text-slate-700 mb-2">Asignar al Tema</label>
@@ -156,7 +155,7 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                     </div>
                 )}
 
-                {/* 4. TIPO (Se oculta si está fijado) */}
+                {/* 4. TIPO */}
                 {!fixedType && (
                     <div className="col-span-2 md:col-span-1">
                         <label className="block text-sm font-bold text-slate-700 mb-2">Tipo de Recurso</label>
@@ -187,10 +186,11 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                     </div>
                 )}
 
-                {/* 5. ARCHIVO / URL */}
+                {/* 5. ARCHIVO / URL (PARTE MODIFICADA) */}
                 <div className="col-span-2">
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {type === 'VIDEO' || type === 'LINK' ? 'Enlace (URL)' : 'Subir Archivo (PDF)'}
+                        {type === 'VIDEO' || type === 'LINK' ? 'Enlace (URL)' : 
+                         type === 'TEST' ? 'Subir Archivo (.json)' : 'Subir Archivo (.pdf)'}
                     </label>
                     
                     {type === 'VIDEO' || type === 'LINK' ? (
@@ -211,11 +211,14 @@ const UploadManager = ({ userRole, topics, onUploadSuccess, fixedType, fixedTopi
                                 type="file" 
                                 required
                                 onChange={e => setFile(e.target.files[0])}
-                                accept=".pdf" 
+                                // --- AQUÍ ESTABA EL PROBLEMA ---
+                                accept={type === 'TEST' ? '.json' : type === 'WORD' ? '.doc,.docx' : '.pdf'} 
+                                // -------------------------------
                                 className="w-full p-2.5 rounded-xl border border-slate-200 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
                             <p className="text-[10px] text-slate-400 mt-1 ml-1">
-                                {type === 'TEST' ? 'Sube el examen en formato PDF.' : 'Sube el documento PDF.'}
+                                {type === 'TEST' ? 'Sube el test interactivo en formato .JSON' : 
+                                 type === 'WORD' ? 'Sube el documento Word.' : 'Sube el documento PDF.'}
                             </p>
                         </div>
                     )}

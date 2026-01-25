@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import {
-    CheckCircle, Video, FileText, Link as LinkIcon, File, Play, Download, Lock, Layers, Trash2
+    CheckCircle, Video, FileText, Link as LinkIcon, File, Play, Download, Lock, Layers, Trash2, Brain
 } from 'lucide-react';
 
 import UploadManager from '../components/UploadManager';
+// IMPORTANTE: Asegúrate de tener este componente creado en la ruta correcta
+import TestPlayer from '../components/TestPlayer';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -15,9 +17,10 @@ const DownloadsPage = () => {
     // --- ESTADOS ---
     const [contents, setContents] = useState([]);
     const [loading, setLoading] = useState(true);
-    
-    // --- NUEVO: Estado para el buscador ---
     const [searchTerm, setSearchTerm] = useState('');
+
+    // --- NUEVO ESTADO: CONTROL DEL PLAYER ---
+    const [activeTestUrl, setActiveTestUrl] = useState(null);
 
     // Estado inicial de usuario
     const [userData, setUserData] = useState({
@@ -76,7 +79,7 @@ const DownloadsPage = () => {
                         return topic;
                     });
                 });
-                fetchContents();
+                fetchContents(); // Recargar por si acaso
             } else {
                 alert("Error al eliminar");
             }
@@ -111,8 +114,13 @@ const DownloadsPage = () => {
     }, [navigate]);
 
     // --- HELPERS VISUALES ---
-    const getIcon = (type) => {
-        const safeType = type ? type.toUpperCase() : 'PDF';
+    const getIcon = (file) => {
+        // Lógica para detectar JSON interactivo
+        if (file.url && file.url.toLowerCase().endsWith('.json')) {
+            return <Brain className="h-6 w-6" />;
+        }
+
+        const safeType = file.type ? file.type.toUpperCase() : 'PDF';
         switch (safeType) {
             case 'PDF': return <FileText className="h-6 w-6" />;
             case 'WORD': return <FileText className="h-6 w-6" />;
@@ -126,15 +134,13 @@ const DownloadsPage = () => {
     // --- PERMISOS ---
     const canEdit = userData.role === 'ADMIN' || userData.role === 'PROFESOR';
 
-    // --- FILTRADO Y AGRUPACIÓN (AQUÍ ESTÁ LA MAGIA) ---
-    // 1. Primero filtramos por lo que ha escrito el usuario
+    // --- FILTRADO Y AGRUPACIÓN ---
     const filteredContents = contents.filter(topic => {
         const term = searchTerm.toLowerCase();
         return topic.title.toLowerCase().includes(term) || 
                (topic.description && topic.description.toLowerCase().includes(term));
     });
 
-    // 2. Luego agrupamos SOBRE LOS RESULTADOS FILTRADOS
     const groupA = filteredContents.filter(t => t.title.startsWith('A.'));
     const groupB = filteredContents.filter(t => t.title.startsWith('B.'));
     const others = filteredContents.filter(t => !t.title.startsWith('A.') && !t.title.startsWith('B.'));
@@ -157,43 +163,63 @@ const DownloadsPage = () => {
                         {topic.isPremium && <span className="ml-auto bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 text-xs font-bold px-3 py-1 rounded-full flex items-center shadow-sm"><Lock className="h-3 w-3 mr-1" /> PREMIUM</span>}
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-                        {topic.materials && topic.materials.map((file) => (
-                            <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
-                                <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
-                                    <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${file.type === 'PDF' ? 'bg-red-50 text-red-600' :
-                                        file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' :
+                        {topic.materials && topic.materials.map((file) => {
+                            // DETECTAR SI ES JSON (Test Interactivo)
+                            const isInteractive = file.url && file.url.toLowerCase().endsWith('.json');
+
+                            return (
+                                <div key={file.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between hover:shadow-lg hover:border-blue-200 transition duration-300 transform hover:-translate-y-1 group">
+                                    <div className="flex items-center space-x-4 mb-4 sm:mb-0 overflow-hidden">
+                                        {/* Color del icono según tipo */}
+                                        <div className={`p-3 rounded-xl flex-shrink-0 transition group-hover:scale-110 ${
+                                            isInteractive ? 'bg-purple-100 text-purple-600' :
+                                            file.type === 'PDF' ? 'bg-red-50 text-red-600' :
+                                            file.type === 'VIDEO' ? 'bg-purple-50 text-purple-600' :
                                             file.type === 'TEST' ? 'bg-green-50 text-green-600' :
-                                                file.type === 'WORD' ? 'bg-blue-50 text-blue-600' :
-                                                    'bg-gray-100 text-gray-600'
-                                    }`}>
-                                        {getIcon(file.type)}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3>
-                                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
-                                            <span className="bg-slate-100 px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px]">{file.type}</span>
+                                            file.type === 'WORD' ? 'bg-blue-50 text-blue-600' :
+                                            'bg-gray-100 text-gray-600'
+                                        }`}>
+                                            {getIcon(file)}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h3 className="font-bold text-slate-800 text-base truncate pr-2 group-hover:text-blue-700 transition">{file.title}</h3>
+                                            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-1">
+                                                <span className={`px-2 py-0.5 rounded uppercase font-bold tracking-wider text-[10px] ${isInteractive ? 'bg-purple-100 text-purple-700' : 'bg-slate-100'}`}>
+                                                    {isInteractive ? 'TEST INTERACTIVO' : file.type}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="flex items-center space-x-2">
-                                    <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
-                                        {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
-                                    </a>
+                                    <div className="flex items-center space-x-2">
+                                        {/* LÓGICA DE BOTÓN: Si es JSON -> Hacer Test, Si no -> Bajar/Ver */}
+                                        {isInteractive ? (
+                                            <button 
+                                                onClick={() => setActiveTestUrl(file.url)}
+                                                className="text-white bg-purple-600 hover:bg-purple-700 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap shadow-md shadow-purple-200"
+                                            >
+                                                <Brain className="h-4 w-4 mr-2" /> Hacer Test
+                                            </button>
+                                        ) : (
+                                            <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 bg-blue-50 hover:bg-blue-600 hover:text-white px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center whitespace-nowrap">
+                                                {file.type === 'VIDEO' || file.type === 'LINK' ? <><Play className="h-4 w-4 mr-2" /> Ver</> : <><Download className="h-4 w-4 mr-2" /> Bajar</>}
+                                            </a>
+                                        )}
 
-                                    {canEdit && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleDeleteMaterial(e, file.id)}
-                                            className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
-                                            title="Eliminar material"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    )}
+                                        {canEdit && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleDeleteMaterial(e, file.id)}
+                                                className="text-red-500 bg-red-50 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition shadow-sm cursor-pointer"
+                                                title="Eliminar material"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {(!topic.materials || topic.materials.length === 0) && <div className="col-span-2 bg-slate-50 border border-dashed border-slate-300 rounded-xl p-6 text-center text-slate-400 italic text-sm">No hay materiales disponibles.</div>}
                     </div>
                 </div>
@@ -206,6 +232,14 @@ const DownloadsPage = () => {
             {/* Pasamos onSearch para conectar el buscador del Navbar */}
             <Navbar user={userData} activePage="temario" onSearch={setSearchTerm} />
 
+            {/* --- PLAYER DE TESTS (MODAL) --- */}
+            {activeTestUrl && (
+                <TestPlayer 
+                    fileUrl={activeTestUrl} 
+                    onClose={() => setActiveTestUrl(null)} 
+                />
+            )}
+
             <div className="container mx-auto px-6 py-12">
                 <div className="mb-10 animate-fade-in-up">
                     <h1 className="text-3xl font-bold text-slate-900">Material Didáctico</h1>
@@ -214,7 +248,7 @@ const DownloadsPage = () => {
 
                 <UploadManager
                     userRole={userData.role}
-                    topics={contents} // Pasamos todos para que el selector del upload funcione
+                    topics={contents}
                     onUploadSuccess={fetchContents}
                 />
 
