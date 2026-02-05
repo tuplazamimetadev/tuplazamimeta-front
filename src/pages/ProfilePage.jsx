@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import {
-    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle
+    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle, PartyPopper
 } from 'lucide-react';
+import confetti from 'canvas-confetti'; // Si quieres confeti (opcional), si no borra esta línea y el useEffect del confeti
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams(); // Para leer ?payment=success
     
     // Estados de datos
     const [userData, setUserData] = useState({ name: '', email: '', role: '', expiration: '' });
@@ -17,6 +19,7 @@ const ProfilePage = () => {
     // Estados de UI
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState({ text: '', type: '' }); // type: 'success' | 'error'
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
 
     // --- CARGAR DATOS DEL USUARIO ---
     useEffect(() => {
@@ -30,18 +33,35 @@ const ProfilePage = () => {
                     name: data.name,
                     email: data.email,
                     role: data.role,
-                    expiration: data.expiration // Guardamos el string tal cual ("17/02/2026" o "Ilimitado")
+                    expiration: data.expiration
                 });
             })
             .catch(() => navigate('/login'));
     }, [navigate]);
+
+    // --- EFECTO DE PAGO EXITOSO ---
+    useEffect(() => {
+        if (searchParams.get('payment') === 'success') {
+            setPaymentSuccess(true);
+            setMsg({ text: '¡Pago completado con éxito! Tu suscripción está activa.', type: 'success' });
+            
+            // Efecto de Confeti (si instalaste canvas-confetti, si no, puedes borrar esto)
+            // npm install canvas-confetti
+            try {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } catch (e) { /* Si no está instalado, no pasa nada */ }
+        }
+    }, [searchParams]);
 
     // --- GUARDAR CAMBIOS (NOMBRE Y CONTRASEÑA) ---
     const handleUpdate = async (e) => {
         e.preventDefault();
         setMsg({ text: '', type: '' });
         
-        // Validación de contraseñas
         if (passData.new && passData.new !== passData.confirm) {
             setMsg({ text: 'Las contraseñas nuevas no coinciden.', type: 'error' });
             return;
@@ -59,17 +79,15 @@ const ProfilePage = () => {
                 },
                 body: JSON.stringify({ 
                     name: userData.name,
-                    password: passData.new || null // Solo enviamos si ha escrito algo
+                    password: passData.new || null 
                 })
             });
 
             if (res.ok) {
                 const updatedUser = await res.json();
-                setUserData(prev => ({ ...prev, name: updatedUser.name })); // Actualizar vista
+                setUserData(prev => ({ ...prev, name: updatedUser.name }));
                 setMsg({ text: 'Perfil actualizado correctamente.', type: 'success' });
-                setPassData({ new: '', confirm: '' }); // Limpiar campos contraseña
-                
-                // Actualizar nombre en localStorage si lo usas en otros sitios
+                setPassData({ new: '', confirm: '' });
                 localStorage.setItem('user_name', updatedUser.name);
             } else {
                 setMsg({ text: 'Error al actualizar. Inténtalo de nuevo.', type: 'error' });
@@ -82,7 +100,6 @@ const ProfilePage = () => {
         }
     };
 
-    // Función auxiliar para mostrar el nombre bonito del rol
     const getRoleDisplayName = (role) => {
         if (role === 'ADMIN' || role === 'PROFESOR') return 'Cuenta Administrador';
         if (role === 'PREMIUM' || role === 'COMPLETO') return 'Opositor Completo';
@@ -96,6 +113,20 @@ const ProfilePage = () => {
             <Navbar user={userData} activePage="perfil" />
 
             <div className="container mx-auto px-6 py-12 max-w-5xl">
+                
+                {/* BANNER DE PAGO EXITOSO */}
+                {paymentSuccess && (
+                    <div className="mb-8 p-6 bg-green-600 rounded-2xl shadow-lg text-white animate-bounce-in flex items-center gap-4">
+                        <div className="bg-white/20 p-3 rounded-full">
+                            <PartyPopper className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold">¡Bienvenido al equipo!</h2>
+                            <p className="text-green-100">Tu suscripción se ha activado correctamente. Ya tienes acceso a todo el contenido.</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="mb-10 animate-fade-in-up">
                     <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
                         <User className="h-8 w-8 text-slate-700" /> Configuración de Cuenta
@@ -107,7 +138,6 @@ const ProfilePage = () => {
                     
                     {/* COLUMNA IZQUIERDA: RESUMEN Y PLAN */}
                     <div className="md:col-span-1 space-y-6">
-                        {/* Tarjeta de Perfil */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                             <div className="h-24 w-24 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg border-4 border-white">
                                 {userData.name?.charAt(0).toUpperCase() || 'U'}
@@ -118,7 +148,6 @@ const ProfilePage = () => {
                             </span>
                         </div>
 
-                        {/* Tarjeta de Suscripción */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                             <h3 className="font-bold text-slate-400 text-xs uppercase tracking-wider mb-4 flex items-center gap-2">
                                 <CreditCard className="h-4 w-4" /> Tu Suscripción
@@ -133,7 +162,6 @@ const ProfilePage = () => {
                             
                             {userData.expiration && (
                                 <div className="mb-6 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                                    {/* CORREGIDO: Usamos la variable directa, sin new Date() */}
                                     Válido hasta: <strong>{userData.expiration}</strong>
                                 </div>
                             )}
@@ -147,16 +175,14 @@ const ProfilePage = () => {
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA: FORMULARIO DE EDICIÓN */}
+                    {/* COLUMNA DERECHA: FORMULARIO */}
                     <div className="md:col-span-2">
                         <form onSubmit={handleUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 h-full">
                             
-                            {/* Sección Datos */}
                             <div className="mb-8">
                                 <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
                                     <User className="h-5 w-5 text-blue-500" /> Datos Personales
                                 </h3>
-
                                 <div className="grid gap-6">
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Nombre Completo</label>
@@ -179,19 +205,14 @@ const ProfilePage = () => {
                                                 value={userData.email}
                                             />
                                         </div>
-                                        <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-                                            <AlertCircle className="h-3 w-3" /> El correo no se puede modificar por seguridad.
-                                        </p>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Sección Contraseña */}
                             <div className="mb-8">
                                 <h3 className="font-bold text-lg text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-4">
                                     <Lock className="h-5 w-5 text-blue-500" /> Seguridad
                                 </h3>
-
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Nueva Contraseña</label>
@@ -214,10 +235,8 @@ const ProfilePage = () => {
                                         />
                                     </div>
                                 </div>
-                                <p className="text-xs text-slate-400 mt-2">Deja los campos vacíos si no quieres cambiar tu contraseña.</p>
                             </div>
 
-                            {/* Mensajes de Feedback */}
                             {msg.text && (
                                 <div className={`p-4 rounded-xl mb-6 text-sm font-bold flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 ${msg.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
                                     {msg.type === 'success' ? <CheckCircle className="h-5 w-5"/> : <AlertCircle className="h-5 w-5"/>}
@@ -225,7 +244,6 @@ const ProfilePage = () => {
                                 </div>
                             )}
 
-                            {/* Botón Guardar */}
                             <button 
                                 disabled={loading}
                                 className="w-full bg-slate-900 text-white font-bold py-4 rounded-xl hover:bg-black transition flex items-center justify-center gap-2 shadow-lg shadow-slate-200 disabled:opacity-70 disabled:cursor-not-allowed"

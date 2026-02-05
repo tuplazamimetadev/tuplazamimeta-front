@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import {
-  CheckCircle, Crown, ArrowLeft, FileText
+  CheckCircle, Crown, ArrowLeft, FileText, AlertCircle
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const PlanesPage = () => {
   const navigate = useNavigate();
-
+  const [searchParams] = useSearchParams(); // Para detectar si vuelve de cancelar pago
+  
   // Estado del usuario
   const [userData, setUserData] = useState({
     name: '',
     email: '',
-    role: '',     // Rol interno (TEST, PREMIUM, etc)
+    role: '',     
     expiration: ''
   });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // --- CARGAR DATOS ---
   useEffect(() => {
@@ -28,10 +32,7 @@ const PlanesPage = () => {
     })
       .then(res => res.json())
       .then(data => {
-        // CORRECCIÓN: Mapear los códigos exactos que usa el Backend (SubscriptionController)
         let internalRole = 'STUDENT';
-
-        // El backend devuelve códigos como "TEST", "SUPUESTOS", "COMPLETO" o "ADMIN"
         if (data.role === 'TEST') internalRole = 'TEST';
         if (data.role === 'SUPUESTOS') internalRole = 'PRACTICAL';
         if (data.role === 'COMPLETO' || data.role === 'PREMIUM') internalRole = 'PREMIUM';
@@ -47,19 +48,49 @@ const PlanesPage = () => {
       .catch(err => console.error(err));
   }, [navigate]);
 
-  // --- COMPRAR / ACTUALIZAR ---
-  const handleUpgrade = (planName) => {
-    // LÓGICA TEMPORAL HASTA IMPLEMENTAR PAGOS
-    alert(`¡Gracias por tu interés en el plan ${planName}!\n\nEstamos finalizando la integración de la pasarela de pago segura.\nPróximamente podrás suscribirte automáticamente.`);
-
-    /* --- CÓDIGO ANTIGUO (DESACTIVADO) ---
-    if (!window.confirm(`¿Confirmar suscripción al plan ${planName}?`)) return;
+  // --- LÓGICA DE PAGO CON STRIPE ---
+  const handleSubscribe = async (planName, priceInfo) => {
     const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        navigate('/login');
+        return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
     try {
-        const res = await fetch(`${API_URL}/api/subscription/upgrade`, { ... });
-        if (res.ok) { window.location.reload(); }
-    } catch (err) { console.error(err); }
-    */
+        // Convertimos el precio a céntimos (Stripe trabaja así)
+        // Ejemplo: 19.99 -> 1999
+        const amountInCents = Math.round(priceInfo * 100);
+
+        const response = await fetch(`${API_URL}/api/payment/checkout`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                planName: planName,
+                amount: amountInCents
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.url) {
+            // Redirigimos al usuario a la página segura de Stripe
+            window.location.href = data.url;
+        } else {
+            setErrorMsg(data.error || 'Error al iniciar el pago.');
+            setLoading(false);
+        }
+
+    } catch (error) {
+        console.error("Error de pago:", error);
+        setErrorMsg('No se pudo conectar con el servidor de pagos.');
+        setLoading(false);
+    }
   };
 
   return (
@@ -73,6 +104,20 @@ const PlanesPage = () => {
             <ArrowLeft className="h-4 w-4 mr-2" /> Volver al temario
           </button>
         </div>
+
+        {/* Mensaje de error si falla la conexión */}
+        {errorMsg && (
+             <div className="max-w-3xl mx-auto mb-6 p-4 bg-red-100 text-red-700 rounded-xl flex items-center gap-2">
+                 <AlertCircle className="h-5 w-5" /> {errorMsg}
+             </div>
+        )}
+
+        {/* Mensaje si el usuario canceló el pago en Stripe */}
+        {searchParams.get('payment') === 'cancelled' && (
+             <div className="max-w-3xl mx-auto mb-6 p-4 bg-yellow-100 text-yellow-800 rounded-xl flex items-center gap-2">
+                 <AlertCircle className="h-5 w-5" /> Has cancelado el proceso de pago. No se ha realizado ningún cobro.
+             </div>
+        )}
 
         <div className="text-center mb-12 animate-fade-in-up">
           <h1 className="text-3xl font-bold text-slate-900">Gestiona tu Suscripción</h1>
@@ -92,7 +137,7 @@ const PlanesPage = () => {
               <li className="flex"><CheckCircle className="h-4 w-4 text-green-500 mr-2" /> Acceso Limitado</li>
               <li className="flex"><CheckCircle className="h-4 w-4 text-green-500 mr-2" /> 1 Tema de ejemplo</li>
             </ul>
-            <button disabled={userData.role === 'STUDENT'} className="w-full py-3 rounded-xl border border-slate-300 font-bold text-slate-400 cursor-not-allowed">
+            <button disabled className="w-full py-3 rounded-xl border border-slate-300 font-bold text-slate-400 cursor-not-allowed">
               {userData.role === 'STUDENT' ? 'Tu Plan Actual' : 'Plan Básico'}
             </button>
           </div>
@@ -107,13 +152,16 @@ const PlanesPage = () => {
             <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
               <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Preguntas ilimitadas</li>
               <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Actualizaciones mensuales</li>
-              <li className="flex"><CheckCircle className="h-4 w-4 text-blue-500 mr-2" /> Simulacros Reales</li>
             </ul>
             {userData.role === 'TEST' ? (
               <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
             ) : (
-              <button onClick={() => handleUpgrade('Solo Test')} className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg shadow-blue-200 text-sm">
-                Mejorar a Test
+              <button 
+                onClick={() => handleSubscribe('Solo Test', 19.99)} 
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg shadow-blue-200 text-sm disabled:opacity-50"
+              >
+                {loading ? 'Cargando...' : 'Mejorar a Test'}
               </button>
             )}
           </div>
@@ -126,15 +174,18 @@ const PlanesPage = () => {
             <h3 className="text-xl font-bold text-indigo-600 mb-2">Solo Supuestos</h3>
             <div className="flex items-baseline mb-6"><span className="text-4xl font-extrabold text-slate-900">25,99€</span><span className="ml-1 text-slate-500 text-sm">/mes</span></div>
             <ul className="space-y-3 mb-8 flex-1 text-sm text-slate-600">
-              <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2" /> Casos Prácticos profesionales</li>
+              <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2" /> Casos Prácticos</li>
               <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2" /> Actualización mensual</li>
-              <li className="flex"><FileText className="h-4 w-4 text-indigo-500 mr-2" /> Resolución de dudas</li>
             </ul>
             {userData.role === 'PRACTICAL' ? (
               <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
             ) : (
-              <button onClick={() => handleUpgrade('Solo Supuestos')} className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-200 text-sm">
-                Mejorar a Supuestos
+              <button 
+                onClick={() => handleSubscribe('Solo Supuestos', 25.99)} 
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-200 text-sm disabled:opacity-50"
+              >
+                {loading ? 'Cargando...' : 'Mejorar a Supuestos'}
               </button>
             )}
           </div>
@@ -158,8 +209,12 @@ const PlanesPage = () => {
             {userData.role === 'PREMIUM' || userData.role === 'ADMIN' ? (
               <button disabled className="w-full py-3 rounded-xl bg-green-600 text-white font-bold">Tu Plan Actual</button>
             ) : (
-              <button onClick={() => handleUpgrade('Opositor Completo')} className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm">
-                Conseguir la Plaza
+              <button 
+                onClick={() => handleSubscribe('Opositor Completo', 49.99)} 
+                disabled={loading}
+                className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm disabled:opacity-50"
+              >
+                {loading ? 'Cargando...' : 'Conseguir la Plaza'}
               </button>
             )}
           </div>
