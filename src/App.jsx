@@ -32,8 +32,8 @@ function App() {
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/admin/mensajes" element={<AdminMessagesPage />} />
         <Route path="/fisicas" element={<PhysicalsPage />} />
-        <Route path="/perfil" element={<ProfilePage />} /> {/* <--- AÑADIR */}
-      </Routes>
+        <Route path="/perfil" element={<ProfilePage />} />  {/* Para entrar tú navegando */}
+        <Route path="/profile" element={<ProfilePage />} /> {/* Para cuando vuelvas de Stripe */}      </Routes>
     </Router>
   );
 }
