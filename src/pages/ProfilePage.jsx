@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import {
-    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle
+    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle, XCircle
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -17,6 +17,7 @@ const ProfilePage = () => {
     
     // Estados de UI
     const [loading, setLoading] = useState(false);
+    const [cancelLoading, setCancelLoading] = useState(false); // Estado para el botón de cancelar
     const [msg, setMsg] = useState({ text: '', type: '' }); // type: 'success' | 'error'
 
     // --- 1. DETECTAR SI VIENE DE PAGAR ---
@@ -49,7 +50,7 @@ const ProfilePage = () => {
             .catch(() => navigate('/login'));
     }, [navigate]);
 
-    // --- 3. GUARDAR CAMBIOS ---
+    // --- 3. GUARDAR CAMBIOS DE DATOS ---
     const handleUpdate = async (e) => {
         e.preventDefault();
         setMsg({ text: '', type: '' });
@@ -92,6 +93,38 @@ const ProfilePage = () => {
         }
     };
 
+    // --- 4. CANCELAR SUSCRIPCIÓN ---
+    const handleCancelSubscription = async () => {
+        if (!window.confirm("¿Seguro que quieres cancelar la renovación automática? Podrás seguir entrando hasta que acabe tu mes actual.")) {
+            return;
+        }
+
+        setCancelLoading(true);
+        const token = localStorage.getItem('jwt_token');
+
+        try {
+            const res = await fetch(`${API_URL}/api/payment/cancel-subscription`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json' 
+                }
+            });
+
+            if (res.ok) {
+                const text = await res.text();
+                setMsg({ text: text, type: 'success' });
+            } else {
+                const errorText = await res.text();
+                setMsg({ text: 'Error al cancelar: ' + errorText, type: 'error' });
+            }
+        } catch (error) {
+            setMsg({ text: 'Error de conexión al intentar cancelar.', type: 'error' });
+        } finally {
+            setCancelLoading(false);
+        }
+    };
+
     const getRoleDisplayName = (role) => {
         if (role === 'ADMIN' || role === 'PROFESOR') return 'Cuenta Administrador';
         if (role === 'PREMIUM' || role === 'COMPLETO') return 'Opositor Completo';
@@ -99,6 +132,14 @@ const ProfilePage = () => {
         if (role === 'SUPUESTOS' || role === 'PRACTICAL') return 'Solo Supuestos';
         return 'Plan Gratuito'; 
     };
+
+    // Determinamos si es un usuario de pago (para mostrar el botón de cancelar)
+    // No mostramos el botón a Admins, ni a cuentas Gratis/Student
+    const isPaidUser = userData.role && 
+                       userData.role !== 'PRUEBA' && 
+                       userData.role !== 'STUDENT' && 
+                       userData.role !== 'ADMIN' && 
+                       userData.role !== 'PROFESOR';
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-gray-800">
@@ -114,7 +155,7 @@ const ProfilePage = () => {
 
                 <div className="grid md:grid-cols-3 gap-8 animate-fade-in-up">
                     
-                    {/* COLUMNA IZQUIERDA */}
+                    {/* COLUMNA IZQUIERDA: TARJETA DE USUARIO Y SUSCRIPCIÓN */}
                     <div className="md:col-span-1 space-y-6">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                             <div className="h-24 w-24 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg border-4 border-white">
@@ -140,20 +181,31 @@ const ProfilePage = () => {
                             
                             {userData.expiration && (
                                 <div className="mb-6 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                                    Válido hasta: <strong>{userData.expiration}</strong>
+                                    Válido hasta / Renovación: <strong>{userData.expiration}</strong>
                                 </div>
                             )}
 
                             <button 
                                 onClick={() => navigate('/suscripcion')}
-                                className="w-full py-2.5 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm font-bold text-slate-600 bg-transparent transition"
+                                className="w-full py-2.5 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm font-bold text-slate-600 bg-transparent transition mb-3"
                             >
-                                Gestionar / Renovar
+                                Gestionar / Cambiar Plan
                             </button>
+
+                            {/* BOTÓN DE CANCELAR (Solo visible si pagas) */}
+                            {isPaidUser && (
+                                <button 
+                                    onClick={handleCancelSubscription}
+                                    disabled={cancelLoading}
+                                    className="w-full py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition flex items-center justify-center gap-1"
+                                >
+                                    {cancelLoading ? 'Procesando...' : <><XCircle className="h-3 w-3" /> Cancelar renovación automática</>}
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* COLUMNA DERECHA */}
+                    {/* COLUMNA DERECHA: FORMULARIO */}
                     <div className="md:col-span-2">
                         <form onSubmit={handleUpdate} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 h-full">
                             

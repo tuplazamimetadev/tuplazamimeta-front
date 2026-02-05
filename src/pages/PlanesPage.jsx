@@ -48,8 +48,8 @@ const PlanesPage = () => {
       .catch(err => console.error(err));
   }, [navigate]);
 
-  // --- LÓGICA DE PAGO CON STRIPE ---
-  const handleSubscribe = async (planName, priceInfo) => {
+  // --- LÓGICA DE PAGO CON STRIPE (ACTUALIZADA A SUSCRIPCIONES) ---
+  const handleSubscribe = async (planName, priceId) => {
     const token = localStorage.getItem('jwt_token');
     if (!token) {
         navigate('/login');
@@ -60,10 +60,7 @@ const PlanesPage = () => {
     setErrorMsg('');
 
     try {
-        // Convertimos el precio a céntimos (Stripe trabaja así)
-        // Ejemplo: 19.99 -> 1999
-        const amountInCents = Math.round(priceInfo * 100);
-
+        // YA NO calculamos céntimos. Enviamos el ID del precio directamente.
         const response = await fetch(`${API_URL}/api/payment/checkout`, {
             method: 'POST',
             headers: {
@@ -72,7 +69,7 @@ const PlanesPage = () => {
             },
             body: JSON.stringify({
                 planName: planName,
-                amount: amountInCents
+                priceId: priceId // <--- EL CAMBIO CLAVE: Enviamos el ID de Stripe
             })
         });
 
@@ -157,7 +154,7 @@ const PlanesPage = () => {
               <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
             ) : (
               <button 
-                onClick={() => handleSubscribe('Solo Test', 19.99)} 
+                onClick={() => handleSubscribe('Solo Test', 'price_1SxZukAtRKHWvmYq2m1ApbtU')} 
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-lg shadow-blue-200 text-sm disabled:opacity-50"
               >
@@ -181,7 +178,7 @@ const PlanesPage = () => {
               <button disabled className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-bold">Tu Plan Actual</button>
             ) : (
               <button 
-                onClick={() => handleSubscribe('Solo Supuestos', 25.99)} 
+                onClick={() => handleSubscribe('Solo Supuestos', 'price_1SxZvFAtRKHWvmYqPOFGUE8i')} 
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-200 text-sm disabled:opacity-50"
               >
@@ -210,7 +207,7 @@ const PlanesPage = () => {
               <button disabled className="w-full py-3 rounded-xl bg-green-600 text-white font-bold">Tu Plan Actual</button>
             ) : (
               <button 
-                onClick={() => handleSubscribe('Opositor Completo', 49.99)} 
+                onClick={() => handleSubscribe('Opositor Completo', 'price_1SxZvYAtRKHWvmYqgPMKEPeg')} 
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold transition shadow-lg shadow-yellow-500/20 text-sm disabled:opacity-50"
               >
