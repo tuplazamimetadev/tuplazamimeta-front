@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import {
-    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle, XCircle
+    User, Mail, Lock, Save, CreditCard, CheckCircle, AlertCircle, XCircle, Clock
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const ProfilePage = () => {
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams(); // Hook para leer la URL
+    const [searchParams] = useSearchParams(); 
     
     // Estados de datos
     const [userData, setUserData] = useState({ name: '', email: '', role: '', expiration: '' });
@@ -17,8 +17,11 @@ const ProfilePage = () => {
     
     // Estados de UI
     const [loading, setLoading] = useState(false);
-    const [cancelLoading, setCancelLoading] = useState(false); // Estado para el botón de cancelar
-    const [msg, setMsg] = useState({ text: '', type: '' }); // type: 'success' | 'error'
+    const [cancelLoading, setCancelLoading] = useState(false);
+    const [msg, setMsg] = useState({ text: '', type: '' });
+    
+    // NUEVO: Estado para controlar si ha cancelado en esta sesión
+    const [isCancelled, setIsCancelled] = useState(false);
 
     // --- 1. DETECTAR SI VIENE DE PAGAR ---
     useEffect(() => {
@@ -27,7 +30,6 @@ const ProfilePage = () => {
                 text: '¡Pago recibido con éxito! Tu suscripción se ha activado.', 
                 type: 'success' 
             });
-            // Limpiamos la URL para que no salga el mensaje si recarga
             window.history.replaceState({}, document.title, "/profile");
         }
     }, [searchParams]);
@@ -50,7 +52,7 @@ const ProfilePage = () => {
             .catch(() => navigate('/login'));
     }, [navigate]);
 
-    // --- 3. GUARDAR CAMBIOS DE DATOS ---
+    // --- 3. GUARDAR CAMBIOS DE PERFIL ---
     const handleUpdate = async (e) => {
         e.preventDefault();
         setMsg({ text: '', type: '' });
@@ -112,8 +114,9 @@ const ProfilePage = () => {
             });
 
             if (res.ok) {
-                const text = await res.text();
-                setMsg({ text: text, type: 'success' });
+                // ÉXITO: Marcamos como cancelado para ocultar botones
+                setIsCancelled(true);
+                setMsg({ text: 'Suscripción cancelada correctamente. No se te volverá a cobrar.', type: 'success' });
             } else {
                 const errorText = await res.text();
                 setMsg({ text: 'Error al cancelar: ' + errorText, type: 'error' });
@@ -134,9 +137,8 @@ const ProfilePage = () => {
     };
 
     // Determinamos si es un usuario de pago (para mostrar el botón de cancelar)
-    // No mostramos el botón a Admins, ni a cuentas Gratis/Student
     const isPaidUser = userData.role && 
-                       userData.role !== 'PRUEBA' && 
+                       userData.role !== 'GRATIS' && 
                        userData.role !== 'STUDENT' && 
                        userData.role !== 'ADMIN' && 
                        userData.role !== 'PROFESOR';
@@ -155,7 +157,7 @@ const ProfilePage = () => {
 
                 <div className="grid md:grid-cols-3 gap-8 animate-fade-in-up">
                     
-                    {/* COLUMNA IZQUIERDA: TARJETA DE USUARIO Y SUSCRIPCIÓN */}
+                    {/* COLUMNA IZQUIERDA: RESUMEN Y PLAN */}
                     <div className="md:col-span-1 space-y-6">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
                             <div className="h-24 w-24 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg border-4 border-white">
@@ -181,19 +183,22 @@ const ProfilePage = () => {
                             
                             {userData.expiration && (
                                 <div className="mb-6 p-3 bg-blue-50 rounded-lg text-sm text-blue-800">
-                                    Válido hasta / Renovación: <strong>{userData.expiration}</strong>
+                                    {isCancelled ? 'Acceso válido hasta: ' : 'Próxima renovación: '}
+                                    <strong>{userData.expiration}</strong>
                                 </div>
                             )}
 
-                            <button 
-                                onClick={() => navigate('/suscripcion')}
-                                className="w-full py-2.5 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm font-bold text-slate-600 bg-transparent transition mb-3"
-                            >
-                                Gestionar / Cambiar Plan
-                            </button>
+                            {/* OCULTAR BOTONES SI YA HA CANCELADO */}
+                            {!isCancelled && (
+                                <button 
+                                    onClick={() => navigate('/suscripcion')}
+                                    className="w-full py-2.5 border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 rounded-xl text-sm font-bold text-slate-600 bg-transparent transition mb-3"
+                                >
+                                    Gestionar / Cambiar Plan
+                                </button>
+                            )}
 
-                            {/* BOTÓN DE CANCELAR (Solo visible si pagas) */}
-                            {isPaidUser && (
+                            {isPaidUser && !isCancelled && (
                                 <button 
                                     onClick={handleCancelSubscription}
                                     disabled={cancelLoading}
@@ -201,6 +206,14 @@ const ProfilePage = () => {
                                 >
                                     {cancelLoading ? 'Procesando...' : <><XCircle className="h-3 w-3" /> Cancelar renovación automática</>}
                                 </button>
+                            )}
+
+                            {/* MENSAJE DE CANCELACIÓN EXITOSA */}
+                            {isCancelled && (
+                                <div className="mt-4 p-3 bg-yellow-50 text-yellow-800 rounded-lg text-xs flex items-start gap-2 border border-yellow-200 animate-fade-in-up">
+                                    <Clock className="h-4 w-4 flex-shrink-0" />
+                                    <p>Suscripción cancelada. Podrás seguir entrando hasta el {userData.expiration}, después tu cuenta volverá al plan gratuito.</p>
+                                </div>
                             )}
                         </div>
                     </div>
