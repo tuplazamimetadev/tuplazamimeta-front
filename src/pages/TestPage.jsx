@@ -41,7 +41,7 @@ const TestsPage = () => {
         // --- TEMAS ESPECÍFICOS (NUEVOS) ---
         { id: 'CONSTITUCIONAL', label: 'Constitucional', desc: 'Derecho Constitucional y DDHH.', icon: Landmark, color: 'from-slate-600 to-slate-800' },
         { id: 'ADMINISTRATIVO', label: 'Administrativo', desc: 'Derecho Administrativo general.', icon: FileText, color: 'from-cyan-600 to-blue-700' },
-        { id: 'FUNCION_PUBLICA', label: 'Función Policial', desc: 'Ética y Deontología policial.', icon: Shield, color: 'from-indigo-500 to-purple-600' },
+        { id: 'FUNCION_PUBLICA', label: 'Función Pública', desc: 'TREBEP y Personal.', icon: Users, color: 'from-indigo-500 to-purple-600' },
         { id: 'SEGURIDAD_PUBLICA', label: 'Seguridad Pública', desc: 'LO 4/2015 y seguridad privada.', icon: LockIcon, color: 'from-rose-600 to-pink-600' }, // Usamos LockIcon auxiliar abajo
         { id: 'PENAL', label: 'Derecho Penal', desc: 'Código Penal y procesal.', icon: Gavel, color: 'from-red-600 to-red-800' },
         { id: 'NORMATIVA_AUTONOMICA', label: 'Normativa Autonómica', desc: 'Estatutos y leyes locales.', icon: Map, color: 'from-green-600 to-emerald-700' },

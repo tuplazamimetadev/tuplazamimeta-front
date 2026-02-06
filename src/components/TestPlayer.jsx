@@ -235,7 +235,7 @@ const calculateStats = () => {
                             {currentIndex + 1} / {questions.length}
                         </span>
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">
-                            Acierto +1 | Fallo -0.25
+                            Acierto +0,20 | Fallo -0.066
                         </span>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-full transition text-slate-400">
