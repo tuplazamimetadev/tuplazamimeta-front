@@ -23,13 +23,25 @@ const TestsPage = () => {
         { id: 'GENERAL', label: 'Simulacro General', desc: 'Mezcla aleatoria de todo el temario.', icon: Shuffle, color: 'from-blue-600 to-indigo-600' },
         
         // --- BLOQUES GRANDES ---
-        { id: 'BLOQUE_A', label: 'Bloque A: Jurídicas', desc: 'Todo el contenido jurídico.', icon: Scale, color: 'from-emerald-600 to-teal-600' },
-        { id: 'BLOQUE_B', label: 'Bloque B: Sociología', desc: 'Sociología y materias técnicas.', icon: Users, color: 'from-orange-500 to-red-500' },
+{ 
+            id: 'BLOQUE_A', 
+            label: 'Bloque A', 
+            desc: 'Constitucional, Administrativo, Función Pública y Seguridad Pública.', 
+            icon: Scale, 
+            color: 'from-emerald-600 to-teal-600' 
+        },
+        { 
+            id: 'BLOQUE_B', 
+            label: 'Bloque B', 
+            desc: 'Penal Policial, Normativa Autonómica y Tráfico.', 
+            icon: Car, // Icono cambiado a coche por el peso de tráfico 
+            color: 'from-orange-500 to-red-500' 
+        },
 
         // --- TEMAS ESPECÍFICOS (NUEVOS) ---
         { id: 'CONSTITUCIONAL', label: 'Constitucional', desc: 'Derecho Constitucional y DDHH.', icon: Landmark, color: 'from-slate-600 to-slate-800' },
         { id: 'ADMINISTRATIVO', label: 'Administrativo', desc: 'Derecho Administrativo general.', icon: FileText, color: 'from-cyan-600 to-blue-700' },
-        { id: 'FUNCION_POLICIAL', label: 'Función Policial', desc: 'Ética y Deontología policial.', icon: Shield, color: 'from-indigo-500 to-purple-600' },
+        { id: 'FUNCION_PUBLICA', label: 'Función Policial', desc: 'Ética y Deontología policial.', icon: Shield, color: 'from-indigo-500 to-purple-600' },
         { id: 'SEGURIDAD_PUBLICA', label: 'Seguridad Pública', desc: 'LO 4/2015 y seguridad privada.', icon: LockIcon, color: 'from-rose-600 to-pink-600' }, // Usamos LockIcon auxiliar abajo
         { id: 'PENAL', label: 'Derecho Penal', desc: 'Código Penal y procesal.', icon: Gavel, color: 'from-red-600 to-red-800' },
         { id: 'NORMATIVA_AUTONOMICA', label: 'Normativa Autonómica', desc: 'Estatutos y leyes locales.', icon: Map, color: 'from-green-600 to-emerald-700' },
