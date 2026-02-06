@@ -85,7 +85,7 @@ const TestPlayer = ({ fileUrl, directQuestions, onClose }) => {
     };
 
     // --- 3. CÁLCULO DE NOTA (Regla -0.25) ---
-    const calculateStats = () => {
+const calculateStats = () => {
         let correct = 0;
         let incorrect = 0;
         let blank = 0;
@@ -102,13 +102,19 @@ const TestPlayer = ({ fileUrl, directQuestions, onClose }) => {
             }
         });
 
-        // Fórmula: Aciertos - (Fallos * 0.25)
-        const rawScore = correct - (incorrect * 0.25);
-        const finalScore = Math.max(0, rawScore); // Nota mínima 0
-        const maxScore = questions.length;
-        const note = (finalScore / maxScore) * 10; // Nota sobre 10
+        const totalQuestions = questions.length;
+        
+        // CÁLCULO EXACTO PEDIDO
+        // Valor de una pregunta = 10 / N (Ej: 10/50 = 0.20)
+        // Penalización = Valor / 3 (Ej: 0.20/3 = 0.0666...)
+        const valuePerQuestion = 10 / totalQuestions;
+        const penalty = valuePerQuestion / 3;
 
-        return { correct, incorrect, blank, finalScore, maxScore, note };
+        // Nota = (Aciertos * Valor) - (Fallos * Penalización)
+        const rawScore = (correct * valuePerQuestion) - (incorrect * penalty);
+        const finalScore = Math.max(0, rawScore); // No bajamos de 0
+
+        return { correct, incorrect, blank, note: finalScore };
     };
 
     if (loading) return <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center text-white font-bold animate-pulse">Cargando test...</div>;
