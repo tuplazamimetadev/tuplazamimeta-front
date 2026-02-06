@@ -104,9 +104,6 @@ const calculateStats = () => {
 
         const totalQuestions = questions.length;
         
-        // CÁLCULO EXACTO PEDIDO
-        // Valor de una pregunta = 10 / N (Ej: 10/50 = 0.20)
-        // Penalización = Valor / 3 (Ej: 0.20/3 = 0.0666...)
         const valuePerQuestion = 10 / totalQuestions;
         const penalty = valuePerQuestion / 3;
 
@@ -139,11 +136,11 @@ const calculateStats = () => {
                         <div className="grid grid-cols-3 gap-4 mt-6 max-w-lg mx-auto">
                             <div className="bg-green-50 p-4 rounded-xl border border-green-100">
                                 <p className="text-green-700 font-bold text-2xl">{stats.correct}</p>
-                                <p className="text-green-600 text-[10px] uppercase font-bold">Aciertos (+1)</p>
+                                <p className="text-green-600 text-[10px] uppercase font-bold">Aciertos (+0.20)</p>
                             </div>
                             <div className="bg-red-50 p-4 rounded-xl border border-red-100">
                                 <p className="text-red-700 font-bold text-2xl">{stats.incorrect}</p>
-                                <p className="text-red-600 text-[10px] uppercase font-bold">Fallos (-0.25)</p>
+                                <p className="text-red-600 text-[10px] uppercase font-bold">Fallos (-0.066)</p>
                             </div>
                             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <p className="text-slate-700 font-bold text-2xl">{stats.blank}</p>
