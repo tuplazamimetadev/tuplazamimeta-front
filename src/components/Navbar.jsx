@@ -23,9 +23,14 @@ const Navbar = ({ user, activePage, onSearch }) => {
 
     // --- LÓGICA DE PERMISOS ---
     const canEdit = user.role === 'ADMIN' || user.role === 'PROFESOR';
+    
+    // Reglas de visibilidad (Igual que en tus otras páginas)
     const canSeeTemario = user.role !== 'SUPUESTOS';
     const canSeeTests = user.role !== 'SUPUESTOS' && user.role !== 'PRUEBA';
     const canSeeSupuestos = user.role === 'ADMIN' || user.role === 'COMPLETO' || user.role === 'SUPUESTOS';
+    
+    // NUEVO: Regla para Físicas (Ocultar a Prueba/Gratis)
+    const canSeeFisicas = user.role !== 'PRUEBA' && user.role !== 'GRATIS' && user.role !== 'STUDENT';
 
     // --- 1. CARGAR NOTIFICACIONES ---
     useEffect(() => {
@@ -91,9 +96,6 @@ const Navbar = ({ user, activePage, onSearch }) => {
         return "px-4 py-2 rounded-md bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500 hover:text-slate-900 font-bold text-sm transition flex items-center";
     };
 
-    // --- CORRECCIÓN: Eliminada función formatDate() ---
-    // El backend ya envía el string formateado ("17/02/2026" o "Ilimitado")
-
     return (
         <>
             <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-xl">
@@ -124,9 +126,14 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                 <Briefcase className="h-4 w-4 mr-2"/> Supuestos
                             </button>
                         )}
-                        <button onClick={() => navigate('/fisicas')} className={getButtonClass('fisicas')}>
-                            <Activity className="h-4 w-4 mr-2"/> Físicas
-                        </button>
+                        
+                        {/* ✅ AHORA EL BOTÓN DE FÍSICAS TAMBIÉN ESTÁ PROTEGIDO */}
+                        {canSeeFisicas && (
+                            <button onClick={() => navigate('/fisicas')} className={getButtonClass('fisicas')}>
+                                <Activity className="h-4 w-4 mr-2"/> Físicas
+                            </button>
+                        )}
+
                         <button onClick={() => navigate('/noticias')} className={getButtonClass('noticias')}>
                             <Newspaper className="h-4 w-4 mr-2"/> Noticias
                         </button>
@@ -243,9 +250,14 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                     <Briefcase className="h-5 w-5 mr-3 text-indigo-500"/> Supuestos
                                 </button>
                             )}
-                            <button onClick={() => navigate('/fisicas')} className="w-full text-left px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold flex items-center transition">
-                                <Activity className="h-5 w-5 mr-3 text-orange-500"/> Físicas
-                            </button>
+                            
+                            {/* ✅ FÍSICAS EN MÓVIL TAMBIÉN PROTEGIDO */}
+                            {canSeeFisicas && (
+                                <button onClick={() => navigate('/fisicas')} className="w-full text-left px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold flex items-center transition">
+                                    <Activity className="h-5 w-5 mr-3 text-orange-500"/> Físicas
+                                </button>
+                            )}
+
                             <button onClick={() => navigate('/noticias')} className="w-full text-left px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold flex items-center transition">
                                 <Newspaper className="h-5 w-5 mr-3 text-green-500"/> Noticias
                             </button>
@@ -308,7 +320,6 @@ const Navbar = ({ user, activePage, onSearch }) => {
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-slate-600">Válida hasta:</span>
-                                        {/* CORRECCIÓN AQUÍ: Mostrar string directo */}
                                         <span className="font-bold text-slate-800 flex items-center">
                                             <Calendar className="w-3 h-3 mr-1 text-slate-400"/> {user.expiration || 'Indefinido'}
                                         </span>
